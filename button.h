@@ -1,14 +1,12 @@
-/******************** (C) COPYRIGHT 2019 ORION EE ********************************
-* File Name          : button.h
-* Author             : Onur Kayýkcý
-* Version            : V1.0
-* Date               : 09/08/2019
-* Description        : button header
-********************************************************************************/
+/*
+ * button.h
+ *
+ *  Created on: 1 Kas 2021
+ *      Author: Onur KAYIKï¿½I
+ */
 
 #ifndef BUTTON_H_
 #define BUTTON_H_
-
 
 
 #ifndef BUTTON
@@ -50,7 +48,7 @@ enum{
     LED_BLINK
 };
 
-/// Enum for all inputs. 
+/// Enum for all inputs.
 
 enum
 {
@@ -84,9 +82,9 @@ enum
     Channel7,
     Channel8,
     FAIL,
-    
+
     NUM_OF_CASE
-    
+
 };
 
 // enum for channel settings (Trip or alarm)
@@ -167,6 +165,17 @@ enum{
 };
 
 
+// Enum for Signal State for each Channel
+
+enum{
+
+    SIGNAL_ACTIVE = 0,
+    SIGNAL_DISAPPEARED,
+    SIGNAL_PASSIVE,
+
+    NUM_OF_SIGNAL_MODE
+};
+
 
 
 #define BUTTON_READ_PIN(button_ptr) *(button_ptr->BUTTON_PORT_IN)
@@ -241,5 +250,6 @@ extern u8 caseFlag[NUM_OF_CASE];                   /// Flag for cases.
 
 
 #endif /*BUTTON */
+
 
 #endif /* BUTTON_H_ */

@@ -1,18 +1,22 @@
 /******************** (C) COPYRIGHT 2019 ORION EE ********************************
 * File Name          : button.c
-* Author             : Onur Kayýkcý
+* Author             : Sercan Tunï¿½ay
 * Version            : V1.0
-* Date               : 09/08/2019
-* Description        : Get buttons state
+* Date               : 01/06/2019
+* Description        : button algorithms
 ********************************************************************************/
-
-
+#include <msp430.h>
 #include "main.h"
-#include "stdint.h"
-#include "bsp.h"
-#include "button.h"
+#include "cnc.h"
 #include "timeout.h"
-
+#include "ram.h"
+#include "button.h"
+#include "lcd.h"
+#include "telemetry.h"
+#include "submain.h"
+#include "modbus.h"
+#include "uart_A0.h"
+#include "uart_A1.h"
 
 
 #ifdef BUTTON
@@ -77,4 +81,13 @@ u8 Button_State_Func(button_t *button_ptr)
 }
 
 #endif /*BUTTON */
+
+
+
+
+
+
+
+
+
 

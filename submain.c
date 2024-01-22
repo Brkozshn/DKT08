@@ -1,269 +1,210 @@
-/******************** (C) COPYRIGHT 2021 ORION EE ********************************
+/******************** (C) COPYRIGHT 2022 ORION EE ********************************
 * File Name          : submain.c
 * Author             : ONUR KAYIKCI
 * Version            : V1.0
-* Date               : 16/08/2021
-* Description        : submain functions
+* Date               : 15/04/2022
+* Description        : submain
 ********************************************************************************/
 
+
 #include <msp430.h>
-#include "main.h"
+#include "define.h"
 #include "bsp.h"
-#include "button.h"
-#include "stdint.h"
-#include "led.h"
-#include "case.h"
+#include "lcd.h"
+#include "main.h"
+#include "submain.h"
+#include <math.h>
 #include "cnc.h"
+#include "button.h"
+#include "ram.h"
 #include "timeout.h"
+#include "display.h"
+#include "utilities.h"
+#include "uart_A0.h"
+#include "uart_A1.h"
+#include "DS1302.h"
+#include "ATM90E32.h"
 #include "fram.h"
+#include "led.h"
 
 
 
- /*  Function    : init_GPIO
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : all I/O pins's initialization called here.
-  */
+void Software_Trim();
 
- void init_GPIO()
- {
-     
-     /* Watchdog Init */
+/*  Function    : initHardware
+ *  Inputs      : -
+ *  Return      : -
+ *  Desc        : HW initialization.
+ */
+void initHardware(void)
+{
 
-     WDTCTL = WDTPW + WDTHOLD;       // Stop WDT
+    /* Watchdog Init */
 
-     SFRRPCR |= SYSNMIIES | SYSNMI;            // Select NMI function for the RST/NMI pin,
-                                              // interrupt on falling edge
+    WDTCTL = WDTPW + WDTHOLD;       // Stop WDT
+
+    SFRRPCR |= SYSNMIIES | SYSNMI;            // Select NMI function for the RST/NMI pin,
+                                                // interrupt on falling edge
 
     /*All Port Close*/
-
     P1OUT = 0x00;
     P2OUT = 0x00;
     P3OUT = 0x00;
     P4OUT = 0x00;
     P5OUT = 0x00;
 
-     
-     /* OUTPUTS */
+
+      /* OUTPUTS */
 
 
-    HORN_RELAY_OUT_DIR    |= HORN_RELAY_OUT_PIN;
-    TRIP1_DIR    |= TRIP1_PIN;
+      HORN_RELAY_OUT_DIR    |= HORN_RELAY_OUT_PIN;
+      TRIP1_DIR    |= TRIP1_PIN;
 
-    RED1_LED_DIR |= RED1_LED_PIN;
-    Yellow1_LED_DIR |= Yellow1_LED_PIN;
+      RED1_LED_DIR |= RED1_LED_PIN;
+      Yellow1_LED_DIR |= Yellow1_LED_PIN;
 
-    RED2_LED_DIR |= RED2_LED_PIN;
-    Yellow2_LED_DIR |= Yellow2_LED_PIN;
+      RED2_LED_DIR |= RED2_LED_PIN;
+      Yellow2_LED_DIR |= Yellow2_LED_PIN;
 
-    RED3_LED_DIR |= RED3_LED_PIN;
-    Yellow3_LED_DIR |= Yellow3_LED_PIN;
+      RED3_LED_DIR |= RED3_LED_PIN;
+      Yellow3_LED_DIR |= Yellow3_LED_PIN;
 
-    RED4_LED_DIR |= RED4_LED_PIN;
-    Yellow4_LED_DIR |= Yellow4_LED_PIN;
+      RED4_LED_DIR |= RED4_LED_PIN;
+      Yellow4_LED_DIR |= Yellow4_LED_PIN;
 
-    RED5_LED_DIR |= RED5_LED_PIN;
-    Yellow5_LED_DIR |= Yellow5_LED_PIN;
+      RED5_LED_DIR |= RED5_LED_PIN;
+      Yellow5_LED_DIR |= Yellow5_LED_PIN;
 
-    RED6_LED_DIR |= RED6_LED_PIN;
-    Yellow6_LED_DIR |= Yellow6_LED_PIN;
+      RED6_LED_DIR |= RED6_LED_PIN;
+      Yellow6_LED_DIR |= Yellow6_LED_PIN;
 
-    RED7_LED_DIR |= RED7_LED_PIN;
-    Yellow7_LED_DIR |= Yellow7_LED_PIN;
+      RED7_LED_DIR |= RED7_LED_PIN;
+      Yellow7_LED_DIR |= Yellow7_LED_PIN;
 
-    RED8_LED_DIR |= RED8_LED_PIN;
-    Yellow8_LED_DIR |= Yellow8_LED_PIN;
-
-
-
-     /* END OF OUTPUTS*/
+      RED8_LED_DIR |= RED8_LED_PIN;
+      Yellow8_LED_DIR |= Yellow8_LED_PIN;
 
 
-     /*INPUTS*/
-     /*
-     I1_DIR       &= ~I1_PIN;
-     I2_DIR       &= ~I2_PIN;
-     I3_DIR       &= ~I3_PIN;
-     I4_DIR       &= ~I4_PIN;
-     I5_DIR       &= ~I5_PIN;
-     I6_DIR       &= ~I6_PIN;
-     I7_DIR       &= ~I7_PIN;
-     I8_DIR       &= ~I8_PIN;
-*/
+      /* END OF OUTPUTS*/
 
 
-     I1_DIR &= ~I1_PIN;   // Set as input
-     I1_REN |= I1_PIN;    // Enable pull-up/pull-down resistor on the input
-     I1_PORT |= I1_PIN;    // Set the pull-up resistor
+      /*INPUTS*/
 
-     I2_DIR &= ~I2_PIN;   // Set as input
-     I2_REN |= I2_PIN;    // Enable pull-up/pull-down resistor on the input
-     I2_PORT |= I2_PIN;    // Set the pull-up resistor
+      I1_DIR &= ~I1_PIN;   // Set as input
+      I1_REN |= I1_PIN;    // Enable pull-up/pull-down resistor on the input
+      I1_PORT |= I1_PIN;    // Set the pull-up resistor
 
-     I3_DIR &= ~I3_PIN;   // Set as input
-     I3_REN |= I3_PIN;    // Enable pull-up/pull-down resistor on the input
-     I3_PORT |= I3_PIN;    // Set the pull-up resistor
+      I2_DIR &= ~I2_PIN;   // Set as input
+      I2_REN |= I2_PIN;    // Enable pull-up/pull-down resistor on the input
+      I2_PORT |= I2_PIN;    // Set the pull-up resistor
 
-     I4_DIR &= ~I4_PIN;   // Set as input
-     I4_REN |= I4_PIN;    // Enable pull-up/pull-down resistor on the input
-     I4_PORT |= I4_PIN;    // Set the pull-up resistor
+      I3_DIR &= ~I3_PIN;   // Set as input
+      I3_REN |= I3_PIN;    // Enable pull-up/pull-down resistor on the input
+      I3_PORT |= I3_PIN;    // Set the pull-up resistor
 
+      I4_DIR &= ~I4_PIN;   // Set as input
+      I4_REN |= I4_PIN;    // Enable pull-up/pull-down resistor on the input
+      I4_PORT |= I4_PIN;    // Set the pull-up resistor
 
-     I5_DIR &= ~I5_PIN;   // Set as input
-     I5_REN |= I5_PIN;    // Enable pull-up/pull-down resistor on the input
-     I5_PORT |= I5_PIN;    // Set the pull-up resistor
+      I5_DIR &= ~I5_PIN;   // Set as input
+      I5_REN |= I5_PIN;    // Enable pull-up/pull-down resistor on the input
+      I5_PORT |= I5_PIN;    // Set the pull-up resistor
 
-     I6_DIR &= ~I6_PIN;   // Set as input
-     I6_REN |= I6_PIN;    // Enable pull-up/pull-down resistor on the input
-     I6_PORT |= I6_PIN;    // Set the pull-up resistor
+      I6_DIR &= ~I6_PIN;   // Set as input
+      I6_REN |= I6_PIN;    // Enable pull-up/pull-down resistor on the input
+      I6_PORT |= I6_PIN;    // Set the pull-up resistor
 
-     I7_DIR &= ~I7_PIN;   // Set as input
-     I7_REN |= I7_PIN;    // Enable pull-up/pull-down resistor on the input
-     I7_PORT |= I7_PIN;    // Set the pull-up resistor
+      I7_DIR &= ~I7_PIN;   // Set as input
+      I7_REN |= I7_PIN;    // Enable pull-up/pull-down resistor on the input
+      I7_PORT |= I7_PIN;    // Set the pull-up resistor
 
-     I8_DIR &= ~I8_PIN;   // Set as input
-     I8_REN |= I8_PIN;    // Enable pull-up/pull-down resistor on the input
-     I8_PORT |= I8_PIN;    // Set the pull-up resistor
+      I8_DIR &= ~I8_PIN;   // Set as input
+      I8_REN |= I8_PIN;    // Enable pull-up/pull-down resistor on the input
+      I8_PORT |= I8_PIN;    // Set the pull-up resistor
 
 
 
-     MUTE_BUTTON_DIR    &= ~MUTE_BUTTON_PIN;
-     RESET_DIR   &= ~RESET_PIN;
-     TEST_DIR    &= ~TEST_PIN;
-     ACK_BUTTON_DIR  &= ~ACK_BUTTON_PIN;
+      MUTE_BUTTON_DIR    &= ~MUTE_BUTTON_PIN;
+      RESET_DIR   &= ~RESET_PIN;
+      TEST_DIR    &= ~TEST_PIN;
+      ACK_BUTTON_DIR  &= ~ACK_BUTTON_PIN;
+
+      /* END Of INPUTS*/
 
 
-     //LP5860_ClearAllLEDs();              // All leds are off.
-      
-     PM5CTL0 &= ~LOCKLPM5;                    // Disable the GPIO power-on default high-impedance mode
-
- }
-
-
- void input_reset()
- {
-
-     I1_PORT       &= ~I1_PIN;
-     I2_PORT       &= ~I2_PIN;
-     I3_PORT       &= ~I3_PIN;
-     I4_PORT       &= ~I4_PIN;
-     I5_PORT       &= ~I5_PIN;
-     I6_PORT       &= ~I6_PIN;
-     I7_PORT       &= ~I7_PIN;
-     I8_PORT       &= ~I8_PIN;
+       // Configure reference
+    PMMCTL0_H = PMMPW_H;                     // Unlock the PMM registers
+//    PMMCTL2 |= INTREFEN  | REFVSEL_2;        // Enable internal and 2.5V reference  Check cnc.h for ADC_VREF values
+    __delay_cycles(400);                     // Delay for reference settling
 
 
-     MUTE_BUTTON_PORT    &= ~MUTE_BUTTON_PIN;
-     RESET_PORT   &= ~RESET_PIN;
-     TEST_PORT    &= ~TEST_PIN;
-     ACK_BUTTON_PORT  &= ~ACK_BUTTON_PIN;
+//    UART_A0_init();
 
- }
+    UART_A1_init();
 
+    PM5CTL0 &= ~LOCKLPM5;                    // Disable the GPIO power-on default high-impedance mode
 
+    __bis_SR_register(SCG0);                 // disable FLL
+    CSCTL3 |= SELREF__REFOCLK;               // Set REFO as FLL reference source
+    CSCTL1 = DCOFTRIMEN_1 | DCOFTRIM0 | DCOFTRIM1 | DCORSEL_5;// DCOFTRIM=5, DCO Range = 16MHz
+    CSCTL2 = FLLD_0 + 487;
+    //       CSCTL1 = DCOFTRIMEN_1 | DCOFTRIM0 | DCOFTRIM1 | DCORSEL_3;// DCOFTRIM=3, DCO Range = 8MHz
+    //       CSCTL2 = FLLD_0 + 243;                  // DCODIV = 8MHz
+    __delay_cycles(3);
+    __bic_SR_register(SCG0);                // enable FLL
 
- void output_reset() 
- {
-     
-    LP5860_ClearAllLEDs();              // All leds are off.
-    HORN_RELAY_OUT_PORT   &= ~HORN_RELAY_OUT_PIN;
-    TRIP1_PORT    &= ~ TRIP1_PIN;
+    Software_Trim();                        // Software Trim to get the best DCOFTRIM value
 
- }
+    CSCTL4 = SELMS__DCOCLKDIV | SELA__REFOCLK; // set default REFO(~32768Hz) as ACLK source, ACLK = 32768Hz
+                                            // default DCODIV as MCLK and SMCLK source
 
+    __bis_SR_register(GIE);
 
-
- /*  Function    : hardware_init
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : all hardware initialization called here.
-  */
-
- void hardware_init(void)
- {
-   init_GPIO();
- }
-
- 
-  /*  Function    : reset_LED_flags
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : All LED flags OFF.
-  */
- 
- void reset_LED_flags()
- {
-     LED_flag[I1_Trip]=LED_OFF;
-     LED_flag[I1_Alarm]=LED_OFF;
-
-     LED_flag[I2_Trip]=LED_OFF;
-     LED_flag[I2_Alarm]=LED_OFF;
-
-     LED_flag[I3_Trip]=LED_OFF;
-     LED_flag[I3_Alarm]=LED_OFF;
-
-     LED_flag[I4_Trip]=LED_OFF;
-     LED_flag[I4_Alarm]=LED_OFF;
-
-     LED_flag[I5_Trip]=LED_OFF;
-     LED_flag[I5_Alarm]=LED_OFF;
-
-     LED_flag[I6_Trip]=LED_OFF;
-     LED_flag[I6_Alarm]=LED_OFF;
-
-     LED_flag[I7_Trip]=LED_OFF;
-     LED_flag[I7_Alarm]=LED_OFF;
-
-     LED_flag[I8_Trip]=LED_OFF;
-     LED_flag[I8_Alarm]=LED_OFF;
-
- }
- 
-
-  /*  Function    : system_reset
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : Resets the system.
-  */
-
- void system_reset() 
- {
-
-     input_reset();     // Reset all inputs
-     output_reset();    // Reset all output
-     reset_LED_flags();     // Reset all led flags.
-     LP5860_ClearAllLEDs();  // Reset all leds.
-
-     if(system_Run_number == 0)
-     {
-         set_Channel_default();     // Set all channels to "ALARM" for first time
-         system_Run_number = 1;     // System run time
-     }
 }
- 
- 
-  /*  Function    : software_init
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : all software initialization called here.
-  */
- 
- void software_init(void)
- {
+
+
+void defaultCaseFlag()
+{
+
+    caseFlag[Channel1] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel2] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel3] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel4] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel5] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel6] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel7] = SIGNAL_PASSIVE;      // Signal is passive right now.
+    caseFlag[Channel8] = SIGNAL_PASSIVE;      // Signal is passive right now.
+
+}
+
+
+
+void initSoftware()
+{
+
+    // DKT 08 //
 
     system_status.timer_tick=0;
     system_status.timer_tick2=0;
     system_status.timer_internal_fault = 0;
     system_status.channelState = Channel1;
-    
+
 
     if(system_Run_number == 0)
     {
         set_Channel_default();     // Set all channels to "ALARM" for first time
+        defaultCaseFlag();                 // Starting the signal state from Passive
+        SYSCFG0 = FRWPPW | FRWPOA0 | DFWP | PFWP;// Configure 1024 bytes for FRAM write
+
         system_Run_number = 1;     // System run time
+
+        SYSCFG0 = FRWPPW | DFWP | PFWP;     // Program FRAM write protected (not writable)
+
     }
 
-    system_status.Threshold_Control = 700;                 // 100 ms approx.
+
+
+    system_status.Threshold_Control = 1000;                 // 100 ms approx.
 
 
     input_check_point[I1].LASTVALUE                  =   UNKNOWN;
@@ -301,13 +242,13 @@
     input_check_point[I6].BUTTON_PRESSED_CONFIG      =   I6_PRESSED_CFG;
     input_check_point[I6].BUTTON_MASK                =   I6_MASK;
     input_check_point[I6].BUTTON_PORT_IN             =   &I6_IN;
-    
+
     input_check_point[I7].LASTVALUE                  =   UNKNOWN;
     input_check_point[I7].BUTTON_RELEASED_CONFIG     =   I7_RELEASED_CFG ;
     input_check_point[I7].BUTTON_PRESSED_CONFIG      =   I7_PRESSED_CFG;
     input_check_point[I7].BUTTON_MASK                =   I7_MASK;
     input_check_point[I7].BUTTON_PORT_IN             =   &I7_IN;
-    
+
     input_check_point[I8].LASTVALUE                  =   UNKNOWN;
     input_check_point[I8].BUTTON_RELEASED_CONFIG     =   I8_RELEASED_CFG ;
     input_check_point[I8].BUTTON_PRESSED_CONFIG      =   I8_PRESSED_CFG;
@@ -339,158 +280,371 @@
     input_check_point[ACK_BUTTON].BUTTON_PORT_IN           =   &ACK_BUTTON_IN;
 
 
-    
     mute_button_flag = FALSE;
     test_button_flag = FALSE;
     ack_button_flag = FALSE;
     reset_button_flag = FALSE;
-    
-    TRIP1_PORT =   0;
-    HORN_RELAY_OUT_PORT   &= ~HORN_RELAY_OUT_PIN;
 
+    TRIP1_PORT  &=  ~TRIP1_PIN;
+    HORN_RELAY_OUT_PORT   &=  ~HORN_RELAY_OUT_PIN;
+
+
+    // DKT 08 //
+
+
+    system_status.growing_factor = 1;
+    system_status.reset_func_flag &= FALSE;
+
+
+    system_status.relay1_fault_flag = FALSE;
+
+    system_status.repeat_cnter &= 0;
+    system_status.telemetry_period_ms = TM_PERIOD_MS;
+
+    system_status.modbus_session_timeout_ms = MODBUS_TIMEOUT_MS;
+
+    system_status.system_program_vers = PROGRAM_VERS;
+
+    system_status.display_mode = DISPLAY_RESULTS_MODE;
+    system_status.system_battery_active_flag = FALSE;
+
+
+    system_status.sub_menu_lcd_cursor_pos = TOP;
+    system_status.main_menu_lcd_cursor_pos = TOP;
+
+    system_status.lcd_flag = TRUE;
+    system_status.last_lcd_flag = FALSE;
+
+    system_status.button_task_delay     = 10; // *10 ms
+
+    system_status.button_low_timeout    = 50;//125;
+
+    system_status.auto_increase_scaler  = 10;
+
+
+    system_status.main_menu_index &= 0;
+    system_status.date_menu_index &= 0;
+
+    system_status.screen_freeze_flag &= DISABLE;
+
+
+    __no_operation();
+
+
+    _delay_cycles(20000);
+
+}
+
+
+void Software_Trim()
+{
+    unsigned int oldDcoTap = 0xffff;
+    unsigned int newDcoTap = 0xffff;
+    unsigned int newDcoDelta = 0xffff;
+    unsigned int bestDcoDelta = 0xffff;
+    unsigned int csCtl0Copy = 0;
+    unsigned int csCtl1Copy = 0;
+    unsigned int csCtl0Read = 0;
+    unsigned int csCtl1Read = 0;
+    unsigned int dcoFreqTrim = 3;
+    unsigned char endLoop = 0;
+
+    do
+    {
+        CSCTL0 = 0x100;                         // DCO Tap = 256
+        do
+        {
+            CSCTL7 &= ~DCOFFG;                  // Clear DCO fault flag
+        }while (CSCTL7 & DCOFFG);               // Test DCO fault flag
+
+        __delay_cycles((unsigned int)3000 * MCLK_FREQ_MHZ);// Wait FLL lock status (FLLUNLOCK) to be stable
+                                                           // Suggest to wait 24 cycles of divided FLL reference clock
+        while((CSCTL7 & (FLLUNLOCK0 | FLLUNLOCK1)) && ((CSCTL7 & DCOFFG) == 0));
+
+        csCtl0Read = CSCTL0;                   // Read CSCTL0
+        csCtl1Read = CSCTL1;                   // Read CSCTL1
+
+        oldDcoTap = newDcoTap;                 // Record DCOTAP value of last time
+        newDcoTap = csCtl0Read & 0x01ff;       // Get DCOTAP value of this time
+        dcoFreqTrim = (csCtl1Read & 0x0070)>>4;// Get DCOFTRIM value
+
+        if(newDcoTap < 256)                    // DCOTAP < 256
+        {
+            newDcoDelta = 256 - newDcoTap;     // Delta value between DCPTAP and 256
+            if((oldDcoTap != 0xffff) && (oldDcoTap >= 256)) // DCOTAP cross 256
+                endLoop = 1;                   // Stop while loop
+            else
+            {
+                dcoFreqTrim--;
+                CSCTL1 = (csCtl1Read & (~DCOFTRIM)) | (dcoFreqTrim<<4);
+            }
+        }
+        else                                   // DCOTAP >= 256
+        {
+            newDcoDelta = newDcoTap - 256;     // Delta value between DCPTAP and 256
+            if(oldDcoTap < 256)                // DCOTAP cross 256
+                endLoop = 1;                   // Stop while loop
+            else
+            {
+                dcoFreqTrim++;
+                CSCTL1 = (csCtl1Read & (~DCOFTRIM)) | (dcoFreqTrim<<4);
+            }
+        }
+
+        if(newDcoDelta < bestDcoDelta)         // Record DCOTAP closest to 256
+        {
+            csCtl0Copy = csCtl0Read;
+            csCtl1Copy = csCtl1Read;
+            bestDcoDelta = newDcoDelta;
+        }
+
+    }while(endLoop == 0);                      // Poll until endLoop == 1
+
+    CSCTL0 = csCtl0Copy;                       // Reload locked DCOTAP
+    CSCTL1 = csCtl1Copy;                       // Reload locked DCOFTRIM
+    while(CSCTL7 & (FLLUNLOCK0 | FLLUNLOCK1)); // Poll until FLL is locked
+}
+
+
+
+/////// DKT08 Functions //////////
+
+void input_reset()
+{
+
+    I1_PORT       &= ~I1_PIN;
+    I2_PORT       &= ~I2_PIN;
+    I3_PORT       &= ~I3_PIN;
+    I4_PORT       &= ~I4_PIN;
+    I5_PORT       &= ~I5_PIN;
+    I6_PORT       &= ~I6_PIN;
+    I7_PORT       &= ~I7_PIN;
+    I8_PORT       &= ~I8_PIN;
+
+
+    MUTE_BUTTON_PORT    &= ~MUTE_BUTTON_PIN;
+    RESET_PORT   &= ~RESET_PIN;
+    TEST_PORT    &= ~TEST_PIN;
+    ACK_BUTTON_PORT  &= ~ACK_BUTTON_PIN;
+
+}
+
+
+void output_reset()
+{
+   LP5860_ClearAllLEDs();              // All leds are off.
+   HORN_RELAY_OUT_PORT   &= ~HORN_RELAY_OUT_PIN;
+   TRIP1_PORT    &= ~ TRIP1_PIN;
+}
+
+
+
+/*  Function    : reset_LED_flags
+*  Inputs      : -
+*  Return      : -
+*  Desc        : All LED flags OFF.
+*/
+
+void reset_LED_flags()
+{
+   LED_flag[I1_Trip]=LED_OFF;
+   LED_flag[I1_Alarm]=LED_OFF;
+
+   LED_flag[I2_Trip]=LED_OFF;
+   LED_flag[I2_Alarm]=LED_OFF;
+
+   LED_flag[I3_Trip]=LED_OFF;
+   LED_flag[I3_Alarm]=LED_OFF;
+
+   LED_flag[I4_Trip]=LED_OFF;
+   LED_flag[I4_Alarm]=LED_OFF;
+
+   LED_flag[I5_Trip]=LED_OFF;
+   LED_flag[I5_Alarm]=LED_OFF;
+
+   LED_flag[I6_Trip]=LED_OFF;
+   LED_flag[I6_Alarm]=LED_OFF;
+
+   LED_flag[I7_Trip]=LED_OFF;
+   LED_flag[I7_Alarm]=LED_OFF;
+
+   LED_flag[I8_Trip]=LED_OFF;
+   LED_flag[I8_Alarm]=LED_OFF;
 
 }
 
 
 
- /*  Function    : input_button_control
-  *  Inputs      : -
-  *  Return      : -
-  *  Desc        : All button inputs controls at here.
-  */
- 
+/*  Function    : system_reset
+*  Inputs      : -
+*  Return      : -
+*  Desc        : Resets the system.
+*/
+
+void system_reset()
+{
+   input_reset();     // Reset all inputs
+   output_reset();    // Reset all output
+   reset_LED_flags();     // Reset all led flags.
+   LP5860_ClearAllLEDs();  // Reset all leds.
+
+   if(system_Run_number == 0)
+   {
+       set_Channel_default();     // Set all channels to "ALARM" for first time
+       system_Run_number = 1;     // System run time
+   }
+}
+
+
+
+/*  Function    : input_button_control
+ *  Inputs      : -
+ *  Return      : -
+ *  Desc        : All button inputs controls at here.
+ */
+
 void input_button_control()
 {
-    
-    volatile u8 status = 0;
-    volatile u8 status_input;
-    u8 name;
 
-    status=Button_State_Func(&input_check_point[MUTE_BUTTON]);
-    
-    switch(status)
-    {
-        case STILL_PRESSED:
-        
-            mute_button_flag = TRUE;
-            HORN_RELAY_OUT_PORT   |=  HORN_RELAY_OUT_PIN;
+   volatile u8 status = 0;
+   volatile u8 status_input;
+   u8 name;
 
+   status=Button_State_Func(&input_check_point[MUTE_BUTTON]);
+
+   switch(status)
+   {
+       case STILL_PRESSED:
+
+           mute_button_flag = TRUE;
+           HORN_RELAY_OUT_PORT   |=  HORN_RELAY_OUT_PIN;
+
+           break;
+
+       case AGAIN_RELEASED:
+       case RELEASED:
+       case STILL_RELEASED:
+
+           //Release_horn_test();     // Going back to previous status for all channels.
+           mute_button_flag = FALSE;
+           break;
+   }
+
+   status=Button_State_Func(&input_check_point[RESET_BUTTON]);
+
+   switch(status)
+   {
+       case PRESSED:
+       case AGAIN_PRESSED:
+       case STILL_PRESSED:
+
+           // switch case for signals are active or not
+
+           reset_button_flag=TRUE;
+           LP5860_ClearAllLEDs();              // All leds off
+
+
+           for(name = 0 ; name < 8 ; name++)
+           {
+               status_input = Button_State_Func(&input_check_point[name]);
+
+               /// Signal is disappeared
+
+               if(status_input == STILL_RELEASED)
+               {
+                   if(caseFlag[name] == SIGNAL_DISAPPEARED)
+                   {
+                       caseFlag[Channel1] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+                       HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
+                       TRIP1_PORT   &=  ~TRIP1_PIN;
+
+                   // Since we have 16 led flags we implement the logic below.
+
+                       LED_flag[(2*name)+1] = LED_OFF;
+                       LED_flag[(2*name)] = LED_OFF;
+                   }
+
+               }
+
+           }
+
+       case STILL_RELEASED:
             break;
-            
-        case AGAIN_RELEASED:
-        case RELEASED:
-        case STILL_RELEASED:    
-          
-            //// A?a??daki yapt???m i?lemleri tek bir fonksiyon ?eklinde Ã¶nceki a?ama fonksiyonu olarak tan?mlayabilirim. Ona gÃ¶re gerekli i?lemler yap?l?yor.
-            
-            Release_horn_test();     // Going back to previous status for all channels.  
-            
-            mute_button_flag = FALSE;
-            HORN_RELAY_OUT_PORT   |=  HORN_RELAY_OUT_PIN;
-            break;     
+       default:
+           break;
+
     }
 
-    status=Button_State_Func(&input_check_point[RESET_BUTTON]);
-    
-    switch(status)
-    {
-        case PRESSED:
-        case AGAIN_PRESSED:
-        case STILL_PRESSED:
-            
-            // switch case for signals are active or not 
-            
-            reset_button_flag=TRUE;
-            LP5860_ClearAllLEDs();              // All leds off
+   status=Button_State_Func(&input_check_point[TEST]);
 
-            
-            for(name = 0 ; name < 8 ; name++)
-            {
-                status_input = Button_State_Func(&input_check_point[name]);   
-                
-                if((status_input == RELEASED) || (status_input == AGAIN_RELEASED) || (status_input == STILL_RELEASED))
-                {
-                        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
-                        TRIP1_PORT   &=  ~TRIP1_PIN;
-                        LED_flag[name] = LED_OFF;
-                        
-                        LP5860_ClearAllLEDs();              // All leds off
+   switch(status)
+   {
+       case PRESSED:
+       case STILL_PRESSED:
 
-                }
-                    
-            }
-            
+           LP5860_OpenAllLEDs();       // Opening all leds
+           test_button_flag = TRUE;
+           TRIP1_PORT |=  TRIP1_PIN ;
+           HORN_RELAY_OUT_PORT   |=  HORN_RELAY_OUT_PIN;
 
-        case STILL_RELEASED:
-             break;
-        default:
+           break;
+
+       case STILL_RELEASED:
+       case AGAIN_RELEASED:
+       case RELEASED:
+
+           //Release_horn_test();     // Going back to previous status for all channels.
+
+           if(test_button_flag == TRUE)
+           {
+               LP5860_ClearAllLEDs();              // All leds off
+               test_button_flag = FALSE;
+               TRIP1_PORT   &=  ~TRIP1_PIN;
+               HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
+           }
+
+
             break;
-            
+       default:
+           break;
      }
-            
-    status=Button_State_Func(&input_check_point[TEST]);
 
-    switch(status)
-    {
-        case PRESSED:
-        case STILL_PRESSED:
+   status = Button_State_Func(&input_check_point[ACK_BUTTON]);
 
-            LP5860_OpenAllLEDs();       // Opening all leds
-            test_button_flag = TRUE;
-            TRIP1_PORT |=  TRIP1_PIN ;
-            HORN_RELAY_OUT_PORT   |=  HORN_RELAY_OUT_PIN;
-            
-            // B?rak?ld???nda eski haline geri dÃ¶nmesi laz?m.
-            
+   switch(status)
+   {
+       case PRESSED:
+       case STILL_PRESSED:
+
+           ack_button_flag = TRUE;
+
+           // switch case for signals are active or not
+
+           for(name = 0 ; name < 8 ; name++)
+           {
+               status_input = Button_State_Func(&input_check_point[name]);
+
+               if((status_input == RELEASED) || (status_input == AGAIN_RELEASED) || (status_input == STILL_RELEASED))
+               {
+                   // Since we have 16 led flags we implement the logic below.
+
+                       LED_flag[(2*name)+1] = LED_OFF;
+                       LED_flag[(2*name)] = LED_OFF;
+
+                       ledsPassive(name);              // Required leds off
+               }
+
+           }
+
+               HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
+               //reset_LED_flags();
+
+       case AGAIN_PRESSED:
+       case STILL_RELEASED:
             break;
-            
-        case STILL_RELEASED:
-        case AGAIN_RELEASED:
-        case RELEASED:
-            
-            Release_horn_test();     // Going back to previous status for all channels.  
-            LP5860_ClearAllLEDs();              // All leds off
-            test_button_flag = FALSE;
-            TRIP1_PORT   &=  ~TRIP1_PIN;
-            HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
-            
-             break;
-        default:
-            break;
-      }
-    
-    status = Button_State_Func(&input_check_point[ACK_BUTTON]);
-    
-    switch(status)
-    {
-        case PRESSED:
-        case STILL_PRESSED:
-            
-            ack_button_flag = TRUE;
-            
-            // switch case for signals are active or not 
-            
-            for(name = 0 ; name < 8 ; name++)
-            {
-                status_input = Button_State_Func(&input_check_point[name]);   
-                
-                if((status_input == RELEASED) || (status_input == AGAIN_RELEASED) || (status_input == STILL_RELEASED))
-                {
-                        LED_flag[name] = LED_OFF;
-                        
-                        LP5860_ClearAllLEDs();              // All leds off
-                }
-                    
-            }
-                HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
-                reset_LED_flags();
-            
-        case AGAIN_PRESSED:
-        case STILL_RELEASED:
-             break;
-        default:
-            break;
-    }
+       default:
+           break;
+   }
 
 }
 
@@ -507,17 +661,23 @@ void Channel_Set_mode() {
     system_status.test_horn_started = FALSE;
     volatile u8 status_TEST = 0;
     volatile u8 status_HORN = 0;
-
-    start_timeout_ms(TEST_HORN_TIMEOUT, TEST_HORN_Time);        // Timeout for 3 seconds
-
-
-    process_timeouts();             // Decrease the timeouts value
+//    system_status.timer_tick2 = 0;
 
 
-    while(check_timeout(TEST_HORN_TIMEOUT) == TO_COUNTING_DOWN)
-    {
+   startTimeout_ms(TEST_HORN_TIMEOUT, TEST_HORN_Time);      // Press for 3 seconds
 
-        process_timeouts();             // Decrease the timeouts value
+   process_timeouts();             // decreases the value of timeout
+
+  while(checkTimeout(TEST_HORN_TIMEOUT) == TO_COUNTING_DOWN)
+  {
+
+        process_timeouts();             // decreases the value of timeout
+
+
+//    while(system_status.timer_tick2 < 3*30000)
+//    {
+
+//        system_status.timer_tick2++;
 
         status_TEST = Button_State_Func(&input_check_point[TEST]); // Get the status of the TEST button
         status_HORN = Button_State_Func(&input_check_point[MUTE_BUTTON]); // Get the status of the HORN button
@@ -527,19 +687,23 @@ void Channel_Set_mode() {
 
         if ((status_TEST == STILL_PRESSED) && (status_HORN == STILL_PRESSED))
         {
-            // Break the Alarm_Blink_TIMEOUT  loop
 
-             if (check_timeout(TEST_HORN_TIMEOUT) == TO_OCCURED)
-             {
+//             if (system_status.timer_tick2 == 3*30000)
+//             {
+
+              if(checkTimeout(TEST_HORN_TIMEOUT) ==  TO_OCCURED)
+              {
                  // Perform the desired action when both buttons are held for 3 seconds
 
+//                 system_status.timer_tick2=0;
                  LP5860_OpenAllLEDs();       // Opening all LEDs
                  system_status.test_horn_started = TRUE;            // TEST and MUTE buttons are pressed for 3 seconds
                  test_button_flag = TRUE;    // Test button is pressed.
                  mute_button_flag = TRUE;    // Mute button is pressed.
                  HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;   // Horn relay is activated.
 
-                 __delay_cycles(1000000);            // 1s approx
+
+                 __delay_cycles(100000);            // 100ms approx
 
                  LP5860_ClearAllLEDs();          // Closing all LEDs
 
@@ -549,6 +713,9 @@ void Channel_Set_mode() {
                  /// Channel Select function.
 
                  Channel_Select();
+
+
+                 __no_operation();
 
                 if(system_status.channelState == FAIL)                      // FAIL State'ine gidecek.
                 {
@@ -564,13 +731,14 @@ void Channel_Set_mode() {
             // If the buttons are not both pressed, reset the timeout
 
             system_status.test_horn_started = FALSE;
-            test_button_flag = TRUE;    // Test button is NOT pressed.
-            mute_button_flag = TRUE;    // Mute button is NOT pressed.
-            check_timeout(TEST_HORN_TIMEOUT);
+            //test_button_flag = FALSE;    // Test button is NOT pressed.
+            mute_button_flag = FALSE;    // Mute button is NOT pressed.
             return;
         }
 
     }
+
+    __no_operation();
 
 }
 
@@ -583,23 +751,23 @@ void Channel_Set_mode() {
  */
 
 
-void save_Channel_settings() 
+void save_Channel_settings()
 {
     volatile u8 status_ACK;
     volatile u8 status_Reset;
-    
-    
-    start_timeout_ms(ACK_Save_TIMEOUT, ACK_Save_Time);           // Timeout for 5 seconds
 
-    process_timeouts();             // decreases the value of timeout
 
-                          
-    while(check_timeout(ACK_Save_TIMEOUT) == TO_COUNTING_DOWN)
-    {
-        process_timeouts();             // decreases the value of timeout
+//    startTimeout_ms(ACK_Save_TIMEOUT, ACK_Save_Time);           // Timeout for 5 seconds
+//
+//    process_timeouts();             // decreases the value of timeout
+//
+//
+//    while(checkTimeout(ACK_Save_TIMEOUT) == TO_COUNTING_DOWN)
+//    {
+//        process_timeouts();             // decreases the value of timeout
 
-        status_ACK = Button_State_Func(&input_check_point[ACK_BUTTON]);  
-                
+        status_ACK = Button_State_Func(&input_check_point[ACK_BUTTON]);
+
         if((status_ACK == PRESSED) ||(status_ACK == AGAIN_PRESSED) || (status_ACK == STILL_PRESSED))
         {
             // No need to call FRAM function to save all settings because they are already saved.
@@ -619,7 +787,7 @@ void save_Channel_settings()
             */
 
         }
-        
+
 
         status_Reset = Button_State_Func(&input_check_point[RESET_BUTTON]);
 
@@ -635,18 +803,18 @@ void save_Channel_settings()
 
                 // Break the ACK_Save_TIMEOUT  loop
 
-         if (check_timeout(ACK_Save_TIMEOUT) == TO_OCCURED)
-         {
-             // Default settings are loaded for each channel
-
-             //Fram_Channel_flag(system_status.channel_Select, RELEASED);        // Writing settings into FRAM
-
-             return;
-         }
+//         if (checkTimeout(ACK_Save_TIMEOUT) == TO_OCCURED)
+//         {
+//             // Default settings are loaded for each channel
+//
+//             //Fram_Channel_flag(system_status.channel_Select, RELEASED);        // Writing settings into FRAM
+//
+//             return;
+//         }
 
                  // If Previous timeout is occurred
          /*
-         if (check_timeout(Alarm_Blink_TIMEOUT) == TO_OCCURED)
+         if (checkTimeout(Alarm_Blink_TIMEOUT) == TO_OCCURED)
          {
              // Default settings are loaded for each channel
 
@@ -654,9 +822,9 @@ void save_Channel_settings()
              break;
          }
             */
-        }
+//        }
 
-}
+    }
 
 
 
@@ -666,8 +834,7 @@ void save_Channel_settings()
  *  Desc        :  Setting all Channels as desired.
  */
 
-
-void Channel_Select() 
+void Channel_Select()
 {
     system_status.Mute_state = ALARM_MODE;
     volatile u8 status_HORN;
@@ -676,34 +843,44 @@ void Channel_Select()
     volatile u8 hornButtonPressCount = 0;
 
 
-
     if(system_status.test_horn_started == FALSE)
     {
         return;
     }
 
 
-    start_timeout_ms(Channel_Select_TIMEOUT, Channel_Select_Time);      // Timeout for 60 seconds
-    
+    startTimeout_ms(Channel_Select_TIMEOUT, Channel_Select_Time);      // Timeout for 60 seconds
+
     process_timeouts();             // decreases the value of timeout
-    
-    while(check_timeout(Channel_Select_TIMEOUT) == TO_COUNTING_DOWN) 
-    {
-        
+
+  while(checkTimeout(Channel_Select_TIMEOUT) == TO_COUNTING_DOWN)
+  {
+
     switch(system_status.channel_Select)
     {
         case Channel1:
-            
+
             // Default mode is alarm and blinks yellow.
-             
+
              process_timeouts();             // decreases the value of timeout
 
             // Alarm is active blink the leds as yellow for  seconds.
 
-             ledsBlink(Channel1);               // Blinking the desired channel yellow led.
+
+             if((channel_flag[I1_Alarm] == TRUE) && (channel_flag[I1_Trip] == FALSE))
+             {
+                 // Default mode is alarm and blinks yellow.
+                 LedBlink_channelSelect(&Yellow1_LED_PORT, Yellow1_LED_PIN);           /// Default Alarm
+             }
+
+             else if((channel_flag[I1_Alarm] == FALSE) && (channel_flag[I1_Trip] == TRUE))
+             {
+                 // Default mode is alarm and blinks yellow.
+                 LedBlink_channelSelect(&RED1_LED_PORT, RED1_LED_PIN);           /// Default Alarm
+             }
 
                             // Choosing Channel features
-                
+
                 status_HORN = Button_State_Func(&input_check_point[MUTE_BUTTON]);
 
                     // Checking status of HORN button
@@ -720,7 +897,10 @@ void Channel_Select()
 
                             system_status.Mute_state = ALARM_MODE;
                             Fram_Channel_flag(Channel1, AGAIN_PRESSED);
-                            ledsBlink(Channel1);
+                            LedBlink_channelSelect(&RED1_LED_PORT, RED1_LED_PIN);
+                            //ledsBlink(Channel1);
+                            //delay_ms(blinkDuration); // Adjust the delay as needed
+
                         }
 
                         else if (system_status.Mute_state == ALARM_MODE)
@@ -729,7 +909,10 @@ void Channel_Select()
 
                             system_status.Mute_state = TRIP_MODE;
                             Fram_Channel_flag(Channel1, PRESSED);
-                            ledsBlink(Channel1);
+                            LedBlink_channelSelect(&Yellow1_LED_PORT, Yellow1_LED_PIN);
+                            //ledsBlink(Channel1);
+                            //delay_ms(blinkDuration); // Adjust the delay as needed
+
                         }
 
                         // Reset button press count after two presses
@@ -741,9 +924,8 @@ void Channel_Select()
                     }
 
 
-                status_TEST = Button_State_Func(&input_check_point[TEST]);  
-                
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                status_TEST = Button_State_Func(&input_check_point[TEST]);
+
 
 
                 if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -751,16 +933,16 @@ void Channel_Select()
                     system_status.channel_Select++;                  // Select next channel
                 }
 
-                // AÅŸaÄŸÄ±daki fonksiyonu YukarÄ±daki TEST butonu iÃ§ine koy
+                // Aþaðýdaki fonksiyonu Yukarýdaki TEST butonu içine koy
 
                 save_Channel_settings();        // Saving all channels settings
-            
+
                 break;
-            
+
 
 
         case Channel2:
-            
+
 
            // Default mode is alarm and blinks yellow.
 
@@ -768,7 +950,17 @@ void Channel_Select()
 
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel2);               // Blinking the desired channel yellow led.
+            if((channel_flag[I2_Alarm] == TRUE) && (channel_flag[I2_Trip] == FALSE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&Yellow2_LED_PORT, Yellow2_LED_PIN);           /// Default Alarm
+            }
+
+            else if((channel_flag[I2_Alarm] == FALSE) && (channel_flag[I2_Trip] == TRUE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&RED2_LED_PORT, RED2_LED_PIN);           /// Default Alarm
+            }
 
                            // Choosing Channel features
 
@@ -788,7 +980,8 @@ void Channel_Select()
 
                        system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel2, AGAIN_PRESSED);
-                       ledsBlink(Channel2);
+                       LedBlink_channelSelect(&RED2_LED_PORT, RED2_LED_PIN);
+                       //ledsBlink(Channel2);
                    }
 
                    else if (system_status.Mute_state == ALARM_MODE)
@@ -797,7 +990,8 @@ void Channel_Select()
 
                        system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel2, PRESSED);
-                       ledsBlink(Channel2);
+                       LedBlink_channelSelect(&Yellow2_LED_PORT, Yellow2_LED_PIN);
+                       //ledsBlink(Channel2);
                    }
 
                    // Reset button press count after two presses
@@ -811,7 +1005,7 @@ void Channel_Select()
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -825,19 +1019,28 @@ void Channel_Select()
                save_Channel_settings();        // Saving all channels settings
 
                break;
-              
+
 
         case Channel3:
-            
+
            // Default mode is alarm and blinks yellow.
 
             process_timeouts();             // decreases the value of timeout
 
-
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel3);               // Blinking the desired channel yellow led.
 
+             if((channel_flag[I3_Alarm] == TRUE) && (channel_flag[I3_Trip] == FALSE))
+             {
+                 // Default mode is alarm and blinks yellow.
+                 LedBlink_channelSelect(&Yellow3_LED_PORT, Yellow3_LED_PIN);           /// Default Alarm
+             }
+
+             else if((channel_flag[I3_Alarm] == FALSE) && (channel_flag[I3_Trip] == TRUE))
+             {
+                 // Default mode is alarm and blinks yellow.
+                 LedBlink_channelSelect(&RED3_LED_PORT, RED3_LED_PIN);           /// Default Alarm
+             }
                            // Choosing Channel features
 
                status_HORN = Button_State_Func(&input_check_point[MUTE_BUTTON]);
@@ -856,7 +1059,8 @@ void Channel_Select()
 
                        system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel3, AGAIN_PRESSED);
-                       ledsBlink(Channel3);
+                       LedBlink_channelSelect(&RED3_LED_PORT, RED3_LED_PIN);
+                       //ledsBlink(Channel3);
                    }
 
                    else if (system_status.Mute_state == ALARM_MODE)
@@ -865,7 +1069,8 @@ void Channel_Select()
 
                        system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel3, PRESSED);
-                       ledsBlink(Channel3);
+                       LedBlink_channelSelect(&Yellow3_LED_PORT, Yellow3_LED_PIN);
+                       //ledsBlink(Channel3);
                    }
 
                    // Reset button press count after two presses
@@ -879,7 +1084,7 @@ void Channel_Select()
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -896,14 +1101,24 @@ void Channel_Select()
 
 
         case Channel4:
-            
+
            // Default mode is alarm and blinks yellow.
 
             process_timeouts();             // decreases the value of timeout
 
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel4);               // Blinking the desired channel yellow led.
+            if((channel_flag[I4_Alarm] == TRUE) && (channel_flag[I4_Trip] == FALSE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&Yellow4_LED_PORT, Yellow4_LED_PIN);           /// Default Alarm
+            }
+
+            else if((channel_flag[I4_Alarm] == FALSE) && (channel_flag[I4_Trip] == TRUE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&RED4_LED_PORT, RED4_LED_PIN);           /// Default Alarm
+            }
 
                            // Choosing Channel features
 
@@ -924,7 +1139,8 @@ void Channel_Select()
 
                        system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel4, AGAIN_PRESSED);
-                       ledsBlink(Channel4);
+                       LedBlink_channelSelect(&RED4_LED_PORT, RED4_LED_PIN);
+                       //ledsBlink(Channel4);
                    }
 
                    else if (system_status.Mute_state == ALARM_MODE)
@@ -933,7 +1149,8 @@ void Channel_Select()
 
                        system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel4, PRESSED);
-                       ledsBlink(Channel4);
+                       LedBlink_channelSelect(&Yellow4_LED_PORT, Yellow4_LED_PIN);
+                       //ledsBlink(Channel4);
                    }
 
                    // Reset button press count after two presses
@@ -947,7 +1164,7 @@ void Channel_Select()
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -963,14 +1180,25 @@ void Channel_Select()
 
 
         case Channel5:
-            
+
        // Default mode is alarm and blinks yellow.
 
         process_timeouts();             // decreases the value of timeout
 
        // Alarm is active blink the leds as yellow for  seconds.
 
-           ledsBlink(Channel5);               // Blinking the desired channel yellow led.
+        if((channel_flag[I5_Alarm] == TRUE) && (channel_flag[I5_Trip] == FALSE))
+        {
+            // Default mode is alarm and blinks yellow.
+            LedBlink_channelSelect(&Yellow5_LED_PORT, Yellow5_LED_PIN);           /// Default Alarm
+        }
+
+        else if((channel_flag[I5_Alarm] == FALSE) && (channel_flag[I5_Trip] == TRUE))
+        {
+            // Default mode is alarm and blinks yellow.
+            LedBlink_channelSelect(&RED5_LED_PORT, RED5_LED_PIN);           /// Default Alarm
+        }
+
 
                        // Choosing Channel features
 
@@ -990,7 +1218,8 @@ void Channel_Select()
 
                     system_status.Mute_state = ALARM_MODE;
                    Fram_Channel_flag(Channel5, AGAIN_PRESSED);
-                   ledsBlink(Channel5);
+                   LedBlink_channelSelect(&RED5_LED_PORT, RED5_LED_PIN);
+                   //ledsBlink(Channel5);
                }
 
                else if ( system_status.Mute_state == ALARM_MODE)
@@ -999,7 +1228,8 @@ void Channel_Select()
 
                     system_status.Mute_state = TRIP_MODE;
                    Fram_Channel_flag(Channel5, PRESSED);
-                   ledsBlink(Channel5);
+                   LedBlink_channelSelect(&Yellow5_LED_PORT, Yellow5_LED_PIN);
+                   //ledsBlink(Channel5);
                }
 
                // Reset button press count after two presses
@@ -1013,7 +1243,7 @@ void Channel_Select()
 
            status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-           delay_ms(blinkDuration); // Adjust the delay as needed
+//           delay_ms(blinkDuration); // Adjust the delay as needed
 
 
            if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -1030,14 +1260,24 @@ void Channel_Select()
 
 
         case Channel6:
-            
+
            // Default mode is alarm and blinks yellow.
 
             process_timeouts();             // decreases the value of timeout
 
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel6);               // Blinking the desired channel yellow led.
+            if((channel_flag[I6_Alarm] == TRUE) && (channel_flag[I6_Trip] == FALSE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&Yellow6_LED_PORT, Yellow6_LED_PIN);           /// Default Alarm
+            }
+
+            else if((channel_flag[I6_Alarm] == FALSE) && (channel_flag[I6_Trip] == TRUE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&RED6_LED_PORT, RED6_LED_PIN);           /// Default Alarm
+            }
 
                            // Choosing Channel features
 
@@ -1051,22 +1291,24 @@ void Channel_Select()
 
                    hornButtonPressCount++;
 
-                   if ( system_status.Mute_state == TRIP_MODE)
+                   if (system_status.Mute_state == TRIP_MODE)
                    {
                        // Set channel 6 to Alarm if HORN button is pressed again
 
                         system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel6, AGAIN_PRESSED);
-                       ledsBlink(Channel6);
+                       LedBlink_channelSelect(&RED6_LED_PORT, RED6_LED_PIN);
+                       //ledsBlink(Channel6);
                    }
 
-                   else if ( system_status.Mute_state == ALARM_MODE)
+                   else if (system_status.Mute_state == ALARM_MODE)
                    {
                        // Set channel 6 to Trip if HORN button is pressed again
 
                         system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel6, PRESSED);
-                       ledsBlink(Channel6);
+                       LedBlink_channelSelect(&Yellow6_LED_PORT, Yellow6_LED_PIN);
+                       //ledsBlink(Channel6);
                    }
 
                    // Reset button press count after two presses
@@ -1080,7 +1322,7 @@ void Channel_Select()
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
                {
@@ -1094,16 +1336,26 @@ void Channel_Select()
 
                break;
 
-             
+
         case Channel7:
-            
+
            // Default mode is alarm and blinks yellow.
 
             process_timeouts();             // decreases the value of timeout
 
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel7);               // Blinking the desired channel yellow led.
+            if((channel_flag[I7_Alarm] == TRUE) && (channel_flag[I7_Trip] == FALSE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&Yellow7_LED_PORT, Yellow7_LED_PIN);           /// Default Alarm
+            }
+
+            else if((channel_flag[I7_Alarm] == FALSE) && (channel_flag[I7_Trip] == TRUE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&RED7_LED_PORT, RED7_LED_PIN);           /// Default Alarm
+            }
 
                            // Choosing Channel features
 
@@ -1124,7 +1376,8 @@ void Channel_Select()
 
                         system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel7, AGAIN_PRESSED);
-                       ledsBlink(Channel7);
+                       LedBlink_channelSelect(&RED7_LED_PORT, RED7_LED_PIN);
+                       //ledsBlink(Channel7);
                    }
 
                    else if ( system_status.Mute_state == ALARM_MODE)
@@ -1133,7 +1386,8 @@ void Channel_Select()
 
                         system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel7, PRESSED);
-                       ledsBlink(Channel7);
+                       LedBlink_channelSelect(&Yellow7_LED_PORT, Yellow7_LED_PIN);
+                       //ledsBlink(Channel7);
                    }
 
                    // Reset button press count after two presses
@@ -1147,7 +1401,7 @@ void Channel_Select()
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -1162,16 +1416,26 @@ void Channel_Select()
 
                break;
 
-             
+
         case Channel8:
-            
+
            // Default mode is alarm and blinks yellow.
 
             process_timeouts();             // decreases the value of timeout
 
            // Alarm is active blink the leds as yellow for  seconds.
 
-               ledsBlink(Channel8);               // Blinking the desired channel yellow led.
+            if((channel_flag[I8_Alarm] == TRUE) && (channel_flag[I8_Trip] == FALSE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&Yellow8_LED_PORT, Yellow8_LED_PIN);           /// Default Alarm
+            }
+
+            else if((channel_flag[I8_Alarm] == FALSE) && (channel_flag[I8_Trip] == TRUE))
+            {
+                // Default mode is alarm and blinks yellow.
+                LedBlink_channelSelect(&RED8_LED_PORT, RED8_LED_PIN);           /// Default Alarm
+            }
 
                            // Choosing Channel features
 
@@ -1191,7 +1455,8 @@ void Channel_Select()
 
                         system_status.Mute_state = ALARM_MODE;
                        Fram_Channel_flag(Channel8, AGAIN_PRESSED);
-                       ledsBlink(Channel8);
+                       LedBlink_channelSelect(&RED8_LED_PORT, RED8_LED_PIN);
+                       //ledsBlink(Channel8);
                    }
 
                    else if ( system_status.Mute_state == ALARM_MODE)
@@ -1200,14 +1465,15 @@ void Channel_Select()
 
                         system_status.Mute_state = TRIP_MODE;
                        Fram_Channel_flag(Channel8, PRESSED);
-                       ledsBlink(Channel8);
+                       LedBlink_channelSelect(&Yellow8_LED_PORT, Yellow8_LED_PIN);
+                       //ledsBlink(Channel8);
                    }
 
                }
 
                status_TEST = Button_State_Func(&input_check_point[TEST]);
 
-               delay_ms(blinkDuration); // Adjust the delay as needed
+//               delay_ms(blinkDuration); // Adjust the delay as needed
 
 
                if((status_TEST == PRESSED) ||(status_TEST == AGAIN_PRESSED))
@@ -1226,7 +1492,7 @@ void Channel_Select()
         }
 
 
-        if (check_timeout(Channel_Select_TIMEOUT) == TO_OCCURED)
+        if (checkTimeout(Channel_Select_TIMEOUT) == TO_OCCURED)
         {
             system_status.channel_Select = Channel1;
             system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
@@ -1241,14 +1507,13 @@ void Channel_Select()
             return;
         }
 
-   }
-    
+     }
 
-}
-
+  }
 
 
-//////// MAIN Function  //////// 
+
+//////// MAIN Function  ////////
 
 
 
@@ -1258,172 +1523,60 @@ void Channel_Select()
  *  Desc        : Starting the tests and check if it is completed or not.
  */
 
-
 void channel_test()
 {
 
-        Channel_Set_mode();         // Controlling "HORN" and "TEST" buttons
+       Channel_Set_mode();         // Controlling "HORN" and "TEST" buttons
+
 
         switch(system_status.channelState){
 
         case Channel1:
-            
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
-
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                                
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel1();         // Check if right inputs are active for channel1.
-                
-                Input_channel_disapp(Channel1);      // If signal is suddenly disappeared.
 
 
-                if(caseFlag[Channel1] == TRUE)
-                {
-
-                 system_status.channelState = Channel2;
-                 break;
-
-                }
-
-                else if (caseFlag[Channel1] == FALSE)
-                {
-
+            if(system_status.channelState != Channel1)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
+                break;
+            }
 
-                }
-              
+            Input_Channel1();         // Check if right inputs are active for channel1.
 
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
+            system_status.channelState = Channel2;
 
 
-                if(system_status.channelState != Channel1)
+                break;
+
+
+        case Channel2:
+
+
+                if(system_status.channelState != Channel2)
                 {
                     system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
                     break;
                 }
 
+                Input_Channel2();                   // Check if right inputs are active for channel2
 
-            }
-           
-                break;
-            
-            
-        case Channel2:
-            
-                      
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
+                system_status.channelState = Channel3;
 
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                               
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel2();                   // Check if right inputs are active for channel2.
-                
-                Input_channel_disapp(Channel2);      // If signal is suddenly disappeared.
-
-                
-                if(caseFlag[Channel2] == TRUE)
-                {
-
-                 system_status.channelState = Channel3;
-                 break;
-
-                }
-
-                else if (caseFlag[Channel2] == FALSE)
-                {
-                    
-                system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-              
-
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-
-                if(system_status.channelState != Channel2)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-            }
 
                 break;
 
 
         case Channel3:
 
-                                
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
 
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel3();             // Check if right inputs are active for channel3.
-                
-                Input_channel_disapp(Channel3);      // If signal is suddenly disappeared.
-                
-
-                if(caseFlag[Channel3] == TRUE)
-                {
-
-                 system_status.channelState = Channel4;
-                 break;
-
-                }
-
-                else if (caseFlag[Channel3] == FALSE)
-                {
-                    
+            if(system_status.channelState != Channel3)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-
-                if(system_status.channelState != Channel3)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
+                break;
             }
 
+            Input_Channel3();                   // Check if right inputs are active for channel2
+
+            system_status.channelState = Channel4;
 
 
                 break;
@@ -1431,206 +1584,62 @@ void channel_test()
 
         case Channel4:
 
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
-
-            process_timeouts();             // Decrease the timeouts value
-
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                                
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel4();                  // Check if right inputs are active for channel4.
-                
-                Input_channel_disapp(Channel4);      // If signal is suddenly disappeared.
-
-                if(caseFlag[Channel4] == TRUE)
-                {
-
-                 system_status.channelState = Channel5;
-                 break;
-
-                }
-
-                else if (caseFlag[Channel4] == FALSE)
-                {
-                    
+            if(system_status.channelState != Channel4)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-              
-
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-
-                if(system_status.channelState != Channel4)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
+                break;
             }
+
+            Input_Channel4();                   // Check if right inputs are active for channel2
+
+            system_status.channelState = Channel5;
+
 
                 break;
 
 
         case Channel5:
 
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
-
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                                
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel5();                      // Check if right inputs are active for channel5.               
-                
-                Input_channel_disapp(Channel5);      // If signal is suddenly disappeared.
-
-
-                if(caseFlag[Channel5] == TRUE)
-                {
-
-                 system_status.channelState = Channel6;
-                 break;
-
-                }
-
-                else if (caseFlag[Channel5] == FALSE)
-                {
-                    
+            if(system_status.channelState != Channel5)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-              
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-                if(system_status.channelState != Channel5)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
+                break;
             }
+
+            Input_Channel5();                   // Check if right inputs are active for channel2
+
+            system_status.channelState = Channel6;
 
 
                 break;
 
 
         case Channel6:
-            
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
 
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel6();                    // Check if right inputs are active for channel6.   
-                
-                Input_channel_disapp(Channel6);      // If signal is suddenly disappeared.
-
-
-                if(caseFlag[Channel6] == TRUE)
-                {
-                 system_status.channelState = Channel7;
-                 break;
-                }
-
-                else if (caseFlag[Channel6] == FALSE)
-                {
-                    
+            if(system_status.channelState != Channel6)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-                if(system_status.channelState != Channel6)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
+                break;
             }
 
+            Input_Channel6();                   // Check if right inputs are active for channel2
+
+            system_status.channelState = Channel7;
 
                 break;
 
 
         case Channel7:
-            
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
 
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                Input_Channel7();                       // Check if right inputs are active for channel7.
-                
-                Input_channel_disapp(Channel7);      // If signal is suddenly disappeared.
-
-
-                if(caseFlag[Channel7] == TRUE)
-                {
-                 system_status.channelState = Channel8;
-                 break;
-                }
-
-                else if (caseFlag[Channel7] == FALSE)
-                {
-
+            if(system_status.channelState != Channel7)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-              
-                }
-              
+                break;
+            }
 
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
+            Input_Channel7();                   // Check if right inputs are active for channel2
 
-
-                if(system_status.channelState != Channel7)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-
-             }
+            system_status.channelState = Channel8;
 
 
                 break;
@@ -1638,116 +1647,90 @@ void channel_test()
 
         case Channel8:
 
-            
-            start_timeout_ms(CASE_TIMEOUT, CASE_Time); // Timeout for 0.5 seconds
 
-            process_timeouts();             // Decrease the timeouts value
-                          
-            while(check_timeout(CASE_TIMEOUT) == TO_COUNTING_DOWN)
-            {                
-                
-                process_timeouts();             // Decrease the timeouts value
-
-                input_button_control();         // Buttons are controlling each case
-
-                // Input reset eklenebilir.
-
-                Input_Channel8();                     // Check if right inputs are active for channel8.
-                
-                Input_channel_disapp(Channel8);      // If signal is suddenly disappeared.
-
-
-                if(caseFlag[Channel8] == TRUE)
-                {
-                 system_status.channelState = Channel1;
-                 break;
-                }
-
-                else if (caseFlag[Channel8] == FALSE)
-                {
-
+            if(system_status.channelState != Channel8)
+            {
                 system_status.channelState = FAIL;                     // FAIL State'ine gidecek.
-                return;
-
-                }
-
-                if(check_timeout(CASE_TIMEOUT) ==  TO_OCCURED)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
-
-                if(system_status.channelState != Channel8)
-                {
-                    system_status.channelState = FAIL;                      // FAIL State'ine gidecek.
-                    break;
-                }
-
+                break;
             }
 
+            Input_Channel8();                   // Check if right inputs are active for channel2
+
+            system_status.channelState = Channel1;
+
                 break;
-            
-            
+
         case FAIL:
-            
+
             // Buraya hata case'inde neler olmas? gerekiyorsa onlar? koy.
 
-            system_reset();          /// Resetting the system. 
+            //system_reset();          /// Resetting the system.
             system_status.channelState = Channel1;
 
                 break;
             default:
                 break;
-            
-        }       
-}
+
+            }
+        }
+
+
+//////// End of DKT08 Functions    ///////
 
 
 
-/*  Function    : task_manager
- *  Inputs      : -
- *  Return      : -
- *  Desc        : All task run at here.
- */
-
-void task_manager()
+void taskManager()
 {
+
     while(1)
     {
 
-        /*
-        system_status.timer_tick2++;
         system_status.timer_tick++;
+        system_status.timer_tick2++;
+
+
+        /*
         system_status.timer_internal_fault++;
         */
 
-        //__delay_cycles(1000000);
+
+        if( system_status.timer_tick>=1800)
+        {
+            system_status.timer_tick=0;
+        }
 
 
         channel_test();             // If some input recieved from channels.
-        
-        //Channel_Select();
-        
-        //CheckSignalState();         // Internal fault control function
 
+        processModbus();
+
+
+        if( system_status.timer_tick2>=system_status.Threshold_Control)
+        {
+            system_status.timer_tick2=0;
+            input_button_control();         // Buttons are controlling each case
+        }
+
+
+
+        //CheckSignalState();         // Internal fault control function
 
         // Internal Fault Control function needs to be added to the "channel_test()" function with this block below.
 
-
         // Internal Fault Control
-        
+
         /*
         if( system_status.timer_internal_fault>=system_status.Threshold_Control)
         {
             system_status.timer_internal_fault=0;
-        
+
             // Check signal state for errors
-            
+
             CheckSignalState();
         }
-        
-        */        
+
+        */
 
     }
+
 }

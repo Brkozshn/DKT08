@@ -1,17 +1,51 @@
-/******************** (C) COPYRIGHT 2021 ORION EE ********************************
+/******************** (C) COPYRIGHT 2020 ORION EE ********************************
 * File Name          : bsp.h
 * Author             : ONUR KAYIKCI
-* Version            : V1.0.0
-* Date               : 16/08/2021
-* Description        : board source package
+* Version            : V1.0
+* Date               : 18/03/2020
+* Description        : bsp.h
 ********************************************************************************/
-#ifndef BSP_H_
-#define BSP_H_
+
+
+#include "define.h" //gerekli fonksiyonlar� �al��t�rmak di�erlerini kapatmak i�in
 
 #include "main.h"
 
-/***************************************************INPUTs -> Check pins******************************/
+#ifndef HEADERS_BSP_H_
+#define HEADERS_BSP_H_
 
+#define PROGRAM_VERS    "v1.4"
+
+#define MCLK_FREQ_MHZ 16
+#define CPU_CLK     16000000 //Hz
+//#define MCLK_FREQ_MHZ 8
+//#define CPU_CLK     8000000 //Hz
+#define TIMER_CLK CPU_CLK/4 //  /4 ID_2 TACCRv ayar�ndan gelecek
+#define TIMERB_CLK CPU_CLK //  /4 ID_2 TACCRv ayar�ndan gelecek
+#define TIMER_FREQ  1000 //Hz  : kullan�c� ayar�            // en fazla 9009 Hz ile 20 ms'de 36 �rnek alarak
+#define TIMERB_FREQ  19200 //Hz  : kullan�c� ayar�
+
+////////UART PINS//////////
+#define UART1_RX_PIN  BIT5  //P2.5
+#define UART1_TX_PIN  BIT6  //P2.6
+#define UART1_SEL_0   P2SEL0
+#define UART1_SEL_1   P2SEL1
+
+#define UART0_RX_PIN  BIT1  //P5.1
+#define UART0_TX_PIN  BIT2  //P5.2
+#define UART0_SEL_0   P5SEL0
+#define UART0_SEL_1   P5SEL1
+
+
+
+/////////// INPUTs  /////////
+
+
+///////// DKT 08    ///////////
+
+#define DKT08
+
+#ifdef DKT08
 
 
 /* Port Name    :   P2.2
@@ -428,27 +462,10 @@
 #define Yellow8_LED_IN      P3IN
 #define Yellow8_LED_DIR     P3DIR
 
+#endif /*DKT08*/
 
 
 
-//// Frequency Settings
 
 
-#define MCLK_FREQ_MHZ 8                     // MCLK = 8MHz //UART � 8MHzde �al��t�ramay�nca 1MHz e d�nd�k
-#define CPU_CLK 	8000000 //Hz
-#define TIMER_CLK CPU_CLK/4 //  /4 ID_2 TACCRv ayar�ndan gelecek
-#define TIMER_FREQ 	1000 //Hz  : kullan�c� ayar�
-
-
-
-/*
-#define MCLK_FREQ_MHZ 1                     // MCLK = 1MHz
-#define CPU_CLK     1000000                    //Hz
-*/
-
-
-
-/* END BSP */
-
-
-#endif /*_BSP_H_*/
+#endif /* HEADERS_BSP_H_ */

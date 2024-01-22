@@ -1,6 +1,6 @@
 /******************** (C) COPYRIGHT 2014 ORION EE ********************************
 * File Name          : timeout.h
-* Author             : Sercan Tunçay
+* Author             : Sercan Tunï¿½ay
 * Version            : V1.0
 * Date               : 01/10/2014
 * Description        : timeouts
@@ -8,41 +8,36 @@
 #ifndef TIMEOUT_H_
 #define TIMEOUT_H_
 
-#include "main.h" //u32 ler için
+#include "main.h" //u32 ler iï¿½in
 
-#define OneSecond_Time 72
+#define OneSecond_Time 16*72*3
 #define Alarm_Blink_Time   (OneSecond_Time*5)         // 5 seconds
 #define CASE_Time  (OneSecond_Time/2)                 // 0,5 seconds
 #define TEST_HORN_Time  (OneSecond_Time*3)            // 3 seconds
 #define ACK_Save_Time  (OneSecond_Time*5)             // 5 seconds
 #define Channel_Select_Time (OneSecond_Time*600)       // 60 seconds
 #define FRAM_Time    (OneSecond_Time*6)               // 6 seconds
-#define Button_Press_Time  (OneSecond_Time)         // 1  milliseconds
-
+#define Button_Press_Time  (OneSecond_Time)         // 1  seconds
 
 
 /* TIMEOUT */
 typedef struct timeout_file_s
 {
-    u8 timeout_activated;
-    u8 timeout_status;
-//  u32 start_time;  //start-finish ram yetmezliðinden kapandý þimdilik
-//  u32 finish_time;
-    u32 countdown;
-
+	u8 timeout_activated;
+	u32 timeout_status;
+//	u32 start_time;  //start-finish ram yetmezliï¿½inden kapandï¿½ ï¿½imdilik
+//	u32 finish_time;
+	u32 countdown;
+	
 }timeout_file_t;
-
-
 
 enum
 {
-    TO_IDLE =0,
-    TO_LOADED,
-    TO_COUNTING_DOWN,
-    TO_OCCURED
+	TO_IDLE =0,
+	TO_LOADED,
+	TO_COUNTING_DOWN,
+	TO_OCCURED
 };
-
-
 
 enum
 {
@@ -69,7 +64,6 @@ enum
 };
 
 
-
 #define I1_INPUT_MS 1
 #define I2_INPUT_MS 1
 #define I3_INPUT_MS 1
@@ -86,11 +80,15 @@ enum
 extern timeout_file_t timeouts[];
 
 extern void process_timeouts();
-extern void start_timeout_ms(u8 to_no, u32 to_val_ms);
-extern u32 check_timeout(u8 to_no);
+extern void startTimeout_ms(u8 to_no, u32 to_val_ms);
+extern void stopTimeout_ms(u8 to_no);
+
+
+extern u32 checkTimeout(u8 to_no);
+extern void delay_ms(u16 ms);
+
 extern u32 get_time_ms();
 extern u32 calc_time_diff_ms(u32 prev_time);
-
 
 
 #endif /*TIMEOUT_H_*/

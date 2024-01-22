@@ -83,10 +83,10 @@ void LP5860_ClearAllLEDs() {
     u8 ledNumber = 0;
 
     // Turn off all LEDs
-    for (ledNumber = 0; ledNumber < NUM_LEDS; ++ledNumber)
+    for (ledNumber = 0; ledNumber < NUM_OF_LEDS; ++ledNumber)
     {
         ledsPassive(ledNumber);
-        delay_ms(ledBetween_Duration); // Adjust the delay as needed
+        //delay_ms(ledBetween_Duration); // Adjust the delay as needed
 
     }
 }
@@ -103,16 +103,61 @@ void LP5860_OpenAllLEDs()
 {
     u8 ledNumber = 0;
     // Turn on all LEDs with maximum intensity
-    for (ledNumber = 0; ledNumber < NUM_LEDS; ++ledNumber)
+    for (ledNumber = 0; ledNumber < NUM_OF_LEDS; ++ledNumber)
     {
         ledsActive(ledNumber);
-        delay_ms(ledBetween_Duration); // Adjust the delay as needed
-
     }
 }
 
 
-///////   Driving LEDs via SPI Functions    ////////
+
+/*  Function    : LED_Blink
+ *  Inputs      : u8 led_port,u8 led_pin, u16 blink_ms, u8 repeat_cnt
+ *  Return      : -
+ *  Desc        :
+ *  NOT         :
+ */
+void LED_Blink(vu8 *led_port,u8 led_pin)
+{
+
+    if(system_status.timer_tick<900)
+        {
+        *(led_port) &= ~led_pin;
+        }
+        else
+        {
+            *(led_port) |= led_pin;
+        }
+}
+
+
+
+
+
+/*  Function    : LedBlink_channelSelect
+ *  Inputs      : u8 led_port,u8 led_pin, u16 blink_ms, u8 repeat_cnt
+ *  Return      : -
+ *  Desc        :
+ *  NOT         :
+ */
+void LedBlink_channelSelect(vu8 *led_port,u8 led_pin)
+{
+
+    // Blink the LED by toggling between the specified intensity and 0
+
+    *(led_port) |= led_pin;
+
+    delay_ms(blinkDuration); // Adjust the delay as needed
+
+    *(led_port) &= ~led_pin;
+
+}
+
+
+
+
+
+///////   Driving LEDs via Functions    ////////
 
 
 /*  Function    : ledsActive
@@ -135,7 +180,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow1_LED_PORT |= Yellow1_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow1_LED] = LED_ON;
             }
 
             // If channel1 signal is Trip
@@ -144,7 +189,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED1_LED_PORT |= RED1_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED1_LED] = LED_ON;
             }
 
             break;
@@ -157,7 +202,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow2_LED_PORT |= Yellow2_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow2_LED] = LED_ON;
             }
 
             // If channel2 signal is Trip
@@ -166,7 +211,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED2_LED_PORT |= RED2_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED2_LED] = LED_ON;
             }
 
             break;
@@ -179,7 +224,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow3_LED_PORT |= Yellow3_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow3_LED] = LED_ON;
             }
 
             // If channel3 signal is Trip
@@ -188,7 +233,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED3_LED_PORT |= RED3_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED3_LED] = LED_ON;
             }
 
             break;
@@ -201,7 +246,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow4_LED_PORT |= Yellow4_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow4_LED] = LED_ON;
             }
 
             // If channel1 signal is Trip
@@ -210,7 +255,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED4_LED_PORT |= RED4_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED4_LED] = LED_ON;
             }
 
             break;
@@ -223,7 +268,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow5_LED_PORT |= Yellow5_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow5_LED] = LED_ON;
             }
 
             // If channel5 signal is Trip
@@ -232,7 +277,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED5_LED_PORT |= RED5_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED5_LED] = LED_ON;
             }
 
             break;
@@ -245,7 +290,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow6_LED_PORT |= Yellow6_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow6_LED] = LED_ON;
             }
 
             // If channel6 signal is Trip
@@ -254,7 +299,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED6_LED_PORT |= RED6_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED6_LED] = LED_ON;
             }
 
             break;
@@ -267,7 +312,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow7_LED_PORT |= Yellow7_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow7_LED] = LED_ON;
             }
 
             // If channel7 signal is Trip
@@ -276,7 +321,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED7_LED_PORT |= RED7_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED7_LED] = LED_ON;
             }
 
             break;
@@ -289,7 +334,7 @@ void ledsActive(u8 channelNumber)
             {
                 Yellow8_LED_PORT |= Yellow8_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow8_LED] = LED_ON;
             }
 
             // If channel1 signal is Trip
@@ -298,7 +343,7 @@ void ledsActive(u8 channelNumber)
             {
                 RED8_LED_PORT |= RED8_LED_PIN;
 
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED8_LED] = LED_ON;
             }
 
             break;
@@ -326,34 +371,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I1_Alarm] == TRUE) && (channel_flag[I1_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow1_LED_PORT |= Yellow1_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow1_LED_PORT  &= ~Yellow1_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow1_LED_PORT, Yellow1_LED_PIN);
+                LED_flag[Yellow1_LED] = LED_BLINK;
             }
 
             // If channel1 signal is Trip
 
             else if((channel_flag[I1_Alarm] == FALSE) && (channel_flag[I1_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED1_LED_PORT |= RED1_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED1_LED_PORT &= ~RED1_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED1_LED_PORT, RED1_LED_PIN);
+                LED_flag[RED1_LED] = LED_BLINK;
             }
 
 
@@ -365,34 +392,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I2_Alarm] == TRUE) && (channel_flag[I2_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow2_LED_PORT |= Yellow2_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow2_LED_PORT  &= ~Yellow2_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow2_LED_PORT, Yellow2_LED_PIN);
+                LED_flag[Yellow2_LED] = LED_BLINK;
             }
 
             // If channel2 signal is Trip
 
             else if((channel_flag[I2_Alarm] == FALSE) && (channel_flag[I2_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED2_LED_PORT |= RED2_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED2_LED_PORT  &= ~RED2_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED2_LED_PORT, RED2_LED_PIN);
+                LED_flag[RED2_LED] = LED_BLINK;
             }
 
             break;
@@ -403,34 +412,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I3_Alarm] == TRUE) && (channel_flag[I3_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow3_LED_PORT |= Yellow3_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow3_LED_PORT  &= ~Yellow3_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow3_LED_PORT, Yellow3_LED_PIN);
+                LED_flag[Yellow3_LED] = LED_BLINK;
             }
 
             // If channel3 signal is Trip
 
             else if((channel_flag[I3_Alarm] == FALSE) && (channel_flag[I3_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED3_LED_PORT |= RED3_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED3_LED_PORT  &= ~RED3_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED3_LED_PORT, RED3_LED_PIN);
+                LED_flag[RED3_LED] = LED_BLINK;
             }
 
             break;
@@ -441,34 +432,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I4_Alarm] == TRUE) && (channel_flag[I4_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow4_LED_PORT |= Yellow4_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow4_LED_PORT  &= ~Yellow4_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow4_LED_PORT, Yellow4_LED_PIN);
+                LED_flag[Yellow4_LED] = LED_BLINK;
             }
 
             // If channel4 signal is Trip
 
             else if((channel_flag[I4_Alarm] == FALSE) && (channel_flag[I4_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED4_LED_PORT |= RED4_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED4_LED_PORT  &= ~RED4_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED4_LED_PORT, RED4_LED_PIN);
+                LED_flag[RED4_LED] = LED_BLINK;
             }
 
             break;
@@ -479,34 +452,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I5_Alarm] == TRUE) && (channel_flag[I5_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow5_LED_PORT |= Yellow5_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow5_LED_PORT  &= ~Yellow5_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow5_LED_PORT, Yellow5_LED_PIN);
+                LED_flag[Yellow5_LED] = LED_BLINK;
             }
 
             // If channel5 signal is Trip
 
             else if((channel_flag[I5_Alarm] == FALSE) && (channel_flag[I5_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED5_LED_PORT |= RED5_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED5_LED_PORT  &= ~RED5_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED5_LED_PORT, RED5_LED_PIN);
+                LED_flag[RED5_LED] = LED_BLINK;
             }
 
             break;
@@ -517,34 +472,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I6_Alarm] == TRUE) && (channel_flag[I6_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow6_LED_PORT |= Yellow6_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow6_LED_PORT  &= ~Yellow6_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow6_LED_PORT, Yellow6_LED_PIN);
+                LED_flag[Yellow6_LED] = LED_BLINK;
             }
 
             // If channel6 signal is Trip
 
             else if((channel_flag[I6_Alarm] == FALSE) && (channel_flag[I6_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED6_LED_PORT |= RED6_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED6_LED_PORT  &= ~RED6_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED6_LED_PORT, RED6_LED_PIN);
+                LED_flag[RED6_LED] = LED_BLINK;
             }
 
             break;
@@ -555,34 +492,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I7_Alarm] == TRUE) && (channel_flag[I7_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow7_LED_PORT |= Yellow7_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow7_LED_PORT  &= ~Yellow7_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow7_LED_PORT, Yellow7_LED_PIN);
+                LED_flag[Yellow7_LED] = LED_BLINK;
             }
 
             // If channel7 signal is Trip
 
             else if((channel_flag[I7_Alarm] == FALSE) && (channel_flag[I7_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED7_LED_PORT |= RED7_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED7_LED_PORT  &= ~RED7_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&RED7_LED_PORT, RED7_LED_PIN);
+                LED_flag[RED7_LED] = LED_BLINK;
             }
 
             break;
@@ -593,33 +512,16 @@ void ledsBlink(u8 channelNumber)
 
             if((channel_flag[I8_Alarm] == TRUE) && (channel_flag[I8_Trip] == FALSE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                Yellow8_LED_PORT |= Yellow8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                Yellow8_LED_PORT  &= ~Yellow8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
+                LED_Blink(&Yellow8_LED_PORT, Yellow8_LED_PIN);
+                LED_flag[Yellow8_LED] = LED_BLINK;
             }
 
             // If channel8 signal is Trip
 
             else if((channel_flag[I8_Alarm] == FALSE) && (channel_flag[I8_Trip] == TRUE))
             {
-
-                // Blink the LED by toggling between the specified intensity and 0
-
-                RED8_LED_PORT |= RED8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
-
-                RED8_LED_PORT  &= ~RED8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_Blink(&RED8_LED_PORT, RED8_LED_PIN);
+                LED_flag[RED8_LED] = LED_BLINK;
             }
 
             break;
@@ -650,8 +552,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I1_Alarm] == TRUE) && (channel_flag[I1_Trip] == FALSE))
             {
                 Yellow1_LED_PORT  &= ~Yellow1_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow1_LED] = LED_OFF;
             }
 
             // If channel1 signal is Trip
@@ -659,8 +560,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I1_Alarm] == FALSE) && (channel_flag[I1_Trip] == TRUE))
             {
                 RED1_LED_PORT  &= ~RED1_LED_PIN;   // Closing LED1 for channel1
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED1_LED] = LED_OFF;
             }
 
             break;
@@ -672,8 +572,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I2_Alarm] == TRUE) && (channel_flag[I2_Trip] == FALSE))
             {
                 Yellow2_LED_PORT  &= ~Yellow2_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow2_LED] = LED_OFF;
             }
 
             // If channel2 signal is Trip
@@ -681,8 +580,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I2_Alarm] == FALSE) && (channel_flag[I2_Trip] == TRUE))
             {
                 RED2_LED_PORT  &= ~RED2_LED_PIN;   // Closing LED2 for channel2
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED2_LED] = LED_OFF;
             }
 
             break;
@@ -694,8 +592,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I3_Alarm] == TRUE) && (channel_flag[I3_Trip] == FALSE))
             {
                 Yellow3_LED_PORT  &= ~Yellow3_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow3_LED] = LED_OFF;
             }
 
             // If channel3 signal is Trip
@@ -703,8 +600,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I3_Alarm] == FALSE) && (channel_flag[I3_Trip] == TRUE))
             {
                 RED3_LED_PORT  &= ~RED3_LED_PIN;   // Closing LED3 for channel3
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED3_LED] = LED_OFF;
             }
 
             break;
@@ -716,8 +612,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I4_Alarm] == TRUE) && (channel_flag[I4_Trip] == FALSE))
             {
                 Yellow4_LED_PORT  &= ~Yellow4_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow4_LED] = LED_OFF;
             }
 
             // If channel4 signal is Trip
@@ -725,8 +620,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I4_Alarm] == FALSE) && (channel_flag[I4_Trip] == TRUE))
             {
                 RED4_LED_PORT  &= ~RED4_LED_PIN;   // Closing LED4 for channel4
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED4_LED] = LED_OFF;
             }
 
             break;
@@ -738,8 +632,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I5_Alarm] == TRUE) && (channel_flag[I5_Trip] == FALSE))
             {
                 Yellow5_LED_PORT  &= ~Yellow5_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow5_LED] = LED_OFF;
             }
 
             // If channel5 signal is Trip
@@ -747,8 +640,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I5_Alarm] == FALSE) && (channel_flag[I5_Trip] == TRUE))
             {
                 RED5_LED_PORT  &= ~RED5_LED_PIN;   // Closing LED5 for channel5
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED5_LED] = LED_OFF;
             }
 
             break;
@@ -760,8 +652,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I6_Alarm] == TRUE) && (channel_flag[I6_Trip] == FALSE))
             {
                 Yellow6_LED_PORT  &= ~Yellow6_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow6_LED] = LED_OFF;
             }
 
             // If channel6 signal is Trip
@@ -769,8 +660,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I6_Alarm] == FALSE) && (channel_flag[I6_Trip] == TRUE))
             {
                 RED6_LED_PORT  &= ~RED6_LED_PIN;   // Closing LED6 for channel6
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED6_LED] = LED_OFF;
             }
 
             break;
@@ -782,8 +672,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I7_Alarm] == TRUE) && (channel_flag[I7_Trip] == FALSE))
             {
                 Yellow7_LED_PORT  &= ~Yellow7_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow7_LED] = LED_OFF;
             }
 
             // If channel7 signal is Trip
@@ -791,8 +680,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I7_Alarm] == FALSE) && (channel_flag[I7_Trip] == TRUE))
             {
                 RED7_LED_PORT  &= ~RED7_LED_PIN;   // Closing LED7 for channel7
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED7_LED] = LED_OFF;
             }
 
             break;
@@ -804,8 +692,7 @@ void ledsPassive(u8 channelNumber)
             if((channel_flag[I8_Alarm] == TRUE) && (channel_flag[I8_Trip] == FALSE))
             {
                 Yellow8_LED_PORT  &= ~Yellow8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[Yellow8_LED] = LED_OFF;
             }
 
             // If channel8 signal is Trip
@@ -813,8 +700,7 @@ void ledsPassive(u8 channelNumber)
             else if((channel_flag[I8_Alarm] == FALSE) && (channel_flag[I8_Trip] == TRUE))
             {
                 RED8_LED_PORT  &= ~RED8_LED_PIN;
-
-                delay_ms(blinkDuration); // Adjust the delay as needed
+                LED_flag[RED8_LED] = LED_OFF;
             }
 
 
@@ -825,45 +711,3 @@ void ledsPassive(u8 channelNumber)
 
 }
 
-
-
-/*  Function    : LP5860_BlinkLED
- *  Inputs      : ledNumber, blinkDuration
- *  Return      : -
- *  Desc        : Blink a led
- */
-
-/*
-void LP5860_BlinkLED(u8 ledNumber, u16 blinkDuration)
-{
-
-    start_timeout_ms(LED_BLINK_TO, blinkDuration);
-
-    while (check_timeout(LED_BLINK_TO) != TO_OCCURED)
-    {
-        // Blink the LED by toggling between the specified intensity and 0
-
-        LP5860_SetLED(ledNumber);
-
-        delay_ms(blinkDuration); // Adjust the delay as needed
-
-        LP5860_SetLED(ledNumber);
-
-        delay_ms(blinkDuration); // Adjust the delay as needed
-
-
-        if(check_timeout(LED_BLINK_TO) == TO_OCCURED)
-        {
-
-            break;
-        }
-
-    }
-
-    // Turn off the LED after the blink duration
-
-    LP5860_SetLED(ledNumber);
-
-}
-
-*/

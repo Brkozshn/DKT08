@@ -17,10 +17,11 @@
 // u8 channel_flag[NUM_OF_CHANNEL];            /// Flag for channel set (Trip or Alarm).
 
 
-
 // Statically-initialized variable
 //#ifdef __TI_COMPILER_VERSION__
 #pragma PERSISTENT(channel_flag)
+#pragma LOCATION(channel_flag, 0x8162)
+
 
  u8 channel_flag[NUM_OF_CHANNEL] = {0};            /// Flag for channel set (Trip or Alarm).
 
@@ -34,35 +35,26 @@
 
 
  // Statically-initialized variable
- #ifdef __TI_COMPILER_VERSION__
+// #ifdef __TI_COMPILER_VERSION__
  #pragma PERSISTENT(system_Run_number)
-  u32 system_Run_number = 0;                                       // Number of times to system runs
- #elif __IAR_SYSTEMS_ICC__
- __persistent unsigned long system_Run_number = 0;
- #else
- // Port the following variable to an equivalent persistent functionality for the specific compiler being used
- unsigned long system_Run_number = 0;
- #endif
+#pragma LOCATION(system_Run_number, 0x816D)
 
+  u32 system_Run_number = 0;                                       // Number of times to system runs
+
+// #elif __IAR_SYSTEMS_ICC__
+// __persistent unsigned long system_Run_number = 0;
+// #else
+// // Port the following variable to an equivalent persistent functionality for the specific compiler being used
+// unsigned long system_Run_number = 0;
+// #endif
 
 
 
 void Fram_Channel_flag(u8 channel, u8 status_HORN)
 {
 
-
     SYSCFG0 = FRWPPW | FRWPOA0 | DFWP | PFWP;// Configure 1024 bytes for FRAM write
 
-    //start_timeout_ms(FRAM_TIMEOUT, FRAM_Time);              // Timeout for 6 seconds
-
-    //process_timeouts();                                     // Decrease the timeout value
-
-
-    //while(check_timeout(FRAM_TIMEOUT) == TO_COUNTING_DOWN)
-
-        //{
-
-        //process_timeouts();                                     // Decrease the timeout value
 
         // Döngü içinde switch'i kaldýr. Yerine if koy
 
@@ -275,8 +267,6 @@ void Fram_Channel_flag(u8 channel, u8 status_HORN)
 
 
 
-
-
 /*  Function    : set_Channel_default
  *  Inputs      : -
  *  Return      : -
@@ -306,12 +296,5 @@ void set_Channel_default()
     channel_flag[I8_Trip] = FALSE;
 
 }
-
-
-
-
-
-
-
 
 
