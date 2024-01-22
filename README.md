@@ -5,3 +5,10 @@ DKT08 (8 channel Annunciator Relay without Modbus)
 - HORN, ACK, TEST, RESET buttons included.
 - Any channel can be set as "Alarm" or "Relay".
 - Each button has own functionality.
+
+## MODBUS Features
+- Sending channel status
+- Sending channel mode configuration
+- Sending dissappeared signal
+
+
