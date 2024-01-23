@@ -14,6 +14,59 @@
 
 
 
+/*  Function    : channel_statusRelay
+ *  Inputs      : u8 channelNumber
+ *  Return      : -
+ *  Desc        :
+ *  NOT         :
+ */
+
+void channel_statusRelay(u8 channelNumber)
+{
+
+        // For Alarm signals
+
+        if((channel_flag[(2*channelNumber)+1] == TRUE) && (channel_flag[(2*channelNumber)] == FALSE))
+        {
+
+            if((caseFlag[channelNumber] == SIGNAL_ACTIVE) || (caseFlag[channelNumber] == SIGNAL_DISAPPEARED))
+            {
+                HORN_RELAY_OUT_PORT  |=   HORN_RELAY_OUT_PIN;
+                TRIP1_PORT  &=  ~TRIP1_PIN;
+            }
+
+            else
+            {
+                HORN_RELAY_OUT_PORT   &=  ~HORN_RELAY_OUT_PIN;
+                TRIP1_PORT  &=  ~TRIP1_PIN;
+            }
+
+        }
+
+
+        // For Trip signals
+
+        else if((channel_flag[(2*channelNumber)+1] == FALSE) && (channel_flag[(2*channelNumber)] == TRUE))
+        {
+
+            if((caseFlag[channelNumber] == SIGNAL_ACTIVE) || (caseFlag[channelNumber] == SIGNAL_DISAPPEARED))
+            {
+                HORN_RELAY_OUT_PORT  |=  HORN_RELAY_OUT_PIN;
+                TRIP1_PORT   |=  TRIP1_PIN;
+            }
+
+            else
+            {
+                HORN_RELAY_OUT_PORT   &=  ~HORN_RELAY_OUT_PIN;
+                TRIP1_PORT  &=  ~TRIP1_PIN;
+            }
+
+        }
+
+    }
+
+
+
 /*  Function    : Release_horn_test
  *  Inputs      : -
  *  Return      : -
@@ -26,7 +79,7 @@ void Release_horn_test()
         volatile u8 status_input;
         u8 name;
 
-        //// A?a??daki yapt???m i?lemleri tek bir fonksiyon ?eklinde önceki a?ama fonksiyonu olarak tan?mlayabilirim. Ona göre gerekli i?lemler yap?l?yor.     
+        //// A?a??daki yapt???m i?lemleri tek bir fonksiyon ?eklinde Ã¶nceki a?ama fonksiyonu olarak tan?mlayabilirim. Ona gÃ¶re gerekli i?lemler yap?l?yor.     
 
             for(name = 0 ; name < 8 ; name++)
             {
@@ -72,7 +125,6 @@ void Release_horn_test()
                     {
                         LED_flag[(2*name)] = LED_OFF;
                         ledsPassive(name);               // All leds off
-
                     }
               }
        }
@@ -96,6 +148,7 @@ void Input_Channel1()
         if((Button_State_Func(&input_check_point[I1]) == PRESSED) || (Button_State_Func(&input_check_point[I1]) == AGAIN_PRESSED))
         {
             caseFlag[Channel1] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+            channel_statusRelay(Channel1);                      // Relay status
         }
 
 
@@ -105,8 +158,8 @@ void Input_Channel1()
             // Blinking the red led.
 
             caseFlag[Channel1] = SIGNAL_ACTIVE;           // Signal is active right now.
-            HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
             ledsBlink(Channel1);                // Blinking the desired  channel led.
+            channel_statusRelay(Channel1);                      // Relay status
         }
 
         /// Signal is disappeared
@@ -118,6 +171,7 @@ void Input_Channel1()
             {
                 caseFlag[Channel1] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
                 ledsActive(Channel1);                         // Led is  activated.
+                channel_statusRelay(Channel1);                      // Relay status
             }
 
         }
@@ -125,7 +179,14 @@ void Input_Channel1()
         else
         {
             ledsPassive(Channel1);
+            caseFlag[Channel1] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+            channel_statusRelay(Channel1);                      // Relay status
+//            TRIP1_PORT  &=  ~TRIP1_PIN;
+//            HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
         }
+
+
+
     
 }
 
@@ -141,11 +202,13 @@ void Input_Channel1()
 void Input_Channel2()
 {
     
+
     /// Signal is Active
 
     if((Button_State_Func(&input_check_point[I2]) == PRESSED) || (Button_State_Func(&input_check_point[I2]) == AGAIN_PRESSED))
     {
         caseFlag[Channel2] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel2);                      // Relay status
     }
 
 
@@ -155,8 +218,8 @@ void Input_Channel2()
         // Blinking the red led.
 
         caseFlag[Channel2] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel2);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel2);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -168,15 +231,21 @@ void Input_Channel2()
         {
             caseFlag[Channel2] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel2);                         // Led is  activated.
+            channel_statusRelay(Channel2);                      // Relay status
         }
     }
 
     else
     {
         ledsPassive(Channel2);
-
+        caseFlag[Channel2] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel2);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
     
+
+
 }
 
 
@@ -191,11 +260,13 @@ void Input_Channel2()
 void Input_Channel3()
 {
     
+
     /// Signal is Active
 
     if((Button_State_Func(&input_check_point[I3]) == PRESSED) || (Button_State_Func(&input_check_point[I3]) == AGAIN_PRESSED))
     {
         caseFlag[Channel3] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel3);                      // Relay status
     }
 
 
@@ -205,8 +276,8 @@ void Input_Channel3()
         // Blinking the red led.
 
         caseFlag[Channel3] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel3);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel3);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -218,6 +289,7 @@ void Input_Channel3()
         {
             caseFlag[Channel3] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel3);                         // Led is  activated.
+            channel_statusRelay(Channel3);                      // Relay status
         }
 
     }
@@ -225,9 +297,13 @@ void Input_Channel3()
     else
     {
         ledsPassive(Channel3);
-
+        caseFlag[Channel3] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel3);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
     
+
 }
 
 
@@ -242,11 +318,13 @@ void Input_Channel3()
 void Input_Channel4()
 {
     
+
     /// Signal is Active
 
     if((Button_State_Func(&input_check_point[I4]) == PRESSED) || (Button_State_Func(&input_check_point[I4]) == AGAIN_PRESSED))
     {
         caseFlag[Channel4] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel4);                      // Relay status
     }
 
 
@@ -256,8 +334,8 @@ void Input_Channel4()
         // Blinking the red led.
 
         caseFlag[Channel4] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel4);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel4);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -269,16 +347,22 @@ void Input_Channel4()
         {
             caseFlag[Channel4] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel4);                         // Led is  activated.
+            channel_statusRelay(Channel4);                      // Relay status
         }
 
     }
 
+
     else
     {
         ledsPassive(Channel4);
-
+        caseFlag[Channel4] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel4);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
-    
+
+
 }
 
 
@@ -298,6 +382,7 @@ void Input_Channel5()
     if((Button_State_Func(&input_check_point[I5]) == PRESSED) || (Button_State_Func(&input_check_point[I5]) == AGAIN_PRESSED))
     {
         caseFlag[Channel5] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel5);                      // Relay status
     }
 
 
@@ -307,8 +392,8 @@ void Input_Channel5()
         // Blinking the red led.
 
         caseFlag[Channel5] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel5);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel5);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -319,6 +404,7 @@ void Input_Channel5()
         {
             caseFlag[Channel5] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel5);                         // Led is  activated.
+            channel_statusRelay(Channel5);                      // Relay status
         }
 
     }
@@ -326,9 +412,13 @@ void Input_Channel5()
     else
     {
         ledsPassive(Channel5);
-
+        caseFlag[Channel5] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel5);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
     
+
 }
 
 
@@ -348,6 +438,7 @@ void Input_Channel6()
     if((Button_State_Func(&input_check_point[I6]) == PRESSED) || (Button_State_Func(&input_check_point[I6]) == AGAIN_PRESSED))
     {
         caseFlag[Channel6] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel6);                      // Relay status
     }
 
 
@@ -357,8 +448,8 @@ void Input_Channel6()
         // Blinking the red led.
 
         caseFlag[Channel6] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel6);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel6);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -370,14 +461,19 @@ void Input_Channel6()
         {
             caseFlag[Channel6] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel6);                         // Led is  activated.
+            channel_statusRelay(Channel6);                      // Relay status
         }
 
     }
 
+
     else
     {
         ledsPassive(Channel6);
-
+        caseFlag[Channel6] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel6);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
 
 }
@@ -400,6 +496,7 @@ void Input_Channel7()
     if((Button_State_Func(&input_check_point[I7]) == PRESSED) || (Button_State_Func(&input_check_point[I7]) == AGAIN_PRESSED))
     {
         caseFlag[Channel7] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel7);                      // Relay status
     }
 
 
@@ -409,8 +506,8 @@ void Input_Channel7()
         // Blinking the red led.
 
         caseFlag[Channel7] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel7);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel7);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -421,14 +518,18 @@ void Input_Channel7()
         {
             caseFlag[Channel7] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel7);                         // Led is  activated.
+            channel_statusRelay(Channel7);                      // Relay status
         }
 
     }
 
+
     else
     {
         ledsPassive(Channel7);
-
+        channel_statusRelay(Channel7);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
     
 }
@@ -451,6 +552,7 @@ void Input_Channel8()
     if((Button_State_Func(&input_check_point[I8]) == PRESSED) || (Button_State_Func(&input_check_point[I8]) == AGAIN_PRESSED))
     {
         caseFlag[Channel8] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel8);                      // Relay status
     }
 
 
@@ -460,8 +562,8 @@ void Input_Channel8()
         // Blinking the red led.
 
         caseFlag[Channel8] = SIGNAL_ACTIVE;           // Signal is active right now.
-        HORN_RELAY_OUT_PORT |= HORN_RELAY_OUT_PIN;
         ledsBlink(Channel8);                // Blinking the desired  channel led.
+        channel_statusRelay(Channel8);                      // Relay status
     }
 
     /// Signal is disappeared
@@ -472,14 +574,19 @@ void Input_Channel8()
         {
             caseFlag[Channel8] = SIGNAL_DISAPPEARED;      // Signal is passive right now.
             ledsActive(Channel8);                         // Led is  activated.
+            channel_statusRelay(Channel8);                      // Relay status
         }
 
     }
 
+
     else
     {
         ledsPassive(Channel8);
-
+        caseFlag[Channel8] = SIGNAL_PASSIVE;           // Signal is Passive right now.
+        channel_statusRelay(Channel8);                      // Relay status
+//        TRIP1_PORT  &=  ~TRIP1_PIN;
+//        HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
     }
 
 }
