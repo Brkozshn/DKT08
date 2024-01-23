@@ -37,7 +37,7 @@
  // Statically-initialized variable
 // #ifdef __TI_COMPILER_VERSION__
  #pragma PERSISTENT(system_Run_number)
-#pragma LOCATION(system_Run_number, 0x816D)
+#pragma LOCATION(system_Run_number, 0x8172)
 
   u32 system_Run_number = 0;                                       // Number of times to system runs
 
@@ -56,9 +56,9 @@ void Fram_Channel_flag(u8 channel, u8 status_HORN)
     SYSCFG0 = FRWPPW | FRWPOA0 | DFWP | PFWP;// Configure 1024 bytes for FRAM write
 
 
-        // Döngü içinde switch'i kaldýr. Yerine if koy
+        // DÃ¶ngÃ¼ iÃ§inde switch'i kaldÄ±r. Yerine if koy
 
-        // En aþaðýda ise To_occured yap if ile sonra return veya break.
+        // En aÅŸaÄŸÄ±da ise To_occured yap if ile sonra return veya break.
 
         switch(channel)
         {
