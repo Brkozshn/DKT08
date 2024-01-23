@@ -160,6 +160,9 @@ void initHardware(void)
 
     __bis_SR_register(GIE);
 
+
+    __delay_cycles(10000);                     // Delay for settings
+
 }
 
 
@@ -193,7 +196,6 @@ void initSoftware()
     if(system_Run_number == 0)
     {
         set_Channel_default();     // Set all channels to "ALARM" for first time
-        defaultCaseFlag();                 // Starting the signal state from Passive
         SYSCFG0 = FRWPPW | FRWPOA0 | DFWP | PFWP;// Configure 1024 bytes for FRAM write
 
         system_Run_number = 1;     // System run time
@@ -203,6 +205,8 @@ void initSoftware()
     }
 
 
+    output_reset();       // Resetting outputs.
+    defaultCaseFlag();    // Starting the signal state from Passive
 
     system_status.Threshold_Control = 1000;                 // 100 ms approx.
 
@@ -295,7 +299,6 @@ void initSoftware()
     system_status.growing_factor = 1;
     system_status.reset_func_flag &= FALSE;
 
-
     system_status.relay1_fault_flag = FALSE;
 
     system_status.repeat_cnter &= 0;
@@ -308,7 +311,6 @@ void initSoftware()
     system_status.display_mode = DISPLAY_RESULTS_MODE;
     system_status.system_battery_active_flag = FALSE;
 
-
     system_status.sub_menu_lcd_cursor_pos = TOP;
     system_status.main_menu_lcd_cursor_pos = TOP;
 
@@ -320,7 +322,6 @@ void initSoftware()
     system_status.button_low_timeout    = 50;//125;
 
     system_status.auto_increase_scaler  = 10;
-
 
     system_status.main_menu_index &= 0;
     system_status.date_menu_index &= 0;
@@ -541,7 +542,7 @@ void input_button_control()
            // switch case for signals are active or not
 
            reset_button_flag=TRUE;
-           LP5860_ClearAllLEDs();              // All leds off
+           output_reset();       // Resetting outputs.
 
 
            for(name = 0 ; name < 8 ; name++)
@@ -554,9 +555,7 @@ void input_button_control()
                {
                    if(caseFlag[name] == SIGNAL_DISAPPEARED)
                    {
-                       caseFlag[Channel1] = SIGNAL_PASSIVE;           // Signal is Passive right now.
-                       HORN_RELAY_OUT_PORT  &=  ~HORN_RELAY_OUT_PIN;
-                       TRIP1_PORT   &=  ~TRIP1_PIN;
+                       caseFlag[name] = SIGNAL_PASSIVE;           // Signal is Passive right now.
 
                    // Since we have 16 led flags we implement the logic below.
 
@@ -933,7 +932,7 @@ void Channel_Select()
                     system_status.channel_Select++;                  // Select next channel
                 }
 
-                // Aþaðýdaki fonksiyonu Yukarýdaki TEST butonu içine koy
+                // AÅŸaÄŸÄ±daki fonksiyonu YukarÄ±daki TEST butonu iÃ§ine koy
 
                 save_Channel_settings();        // Saving all channels settings
 
