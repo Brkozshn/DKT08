@@ -1,8 +1,8 @@
 /******************** (C) COPYRIGHT 2022 ORION EE ********************************
 * File Name          : submain.c
-* Author             : ONUR KAYIKCI
+* Author             : Burak Ozsahin
 * Version            : V1.0
-* Date               : 15/04/2022
+* Date               : 24/01/2024
 * Description        : submain
 ********************************************************************************/
 
@@ -448,29 +448,29 @@ void output_reset()
 
 void reset_LED_flags()
 {
-   LED_flag[I1_Trip]=LED_OFF;
-   LED_flag[I1_Alarm]=LED_OFF;
+   LED_flag[RED1_LED]=LED_OFF;
+   LED_flag[Yellow1_LED]=LED_OFF;
 
-   LED_flag[I2_Trip]=LED_OFF;
-   LED_flag[I2_Alarm]=LED_OFF;
+   LED_flag[RED2_LED]=LED_OFF;
+   LED_flag[Yellow2_LED]=LED_OFF;
 
-   LED_flag[I3_Trip]=LED_OFF;
-   LED_flag[I3_Alarm]=LED_OFF;
+   LED_flag[RED3_LED]=LED_OFF;
+   LED_flag[Yellow3_LED]=LED_OFF;
 
-   LED_flag[I4_Trip]=LED_OFF;
-   LED_flag[I4_Alarm]=LED_OFF;
+   LED_flag[RED4_LED]=LED_OFF;
+   LED_flag[Yellow4_LED]=LED_OFF;
 
-   LED_flag[I5_Trip]=LED_OFF;
-   LED_flag[I5_Alarm]=LED_OFF;
+   LED_flag[RED5_LED]=LED_OFF;
+   LED_flag[Yellow5_LED]=LED_OFF;
 
-   LED_flag[I6_Trip]=LED_OFF;
-   LED_flag[I6_Alarm]=LED_OFF;
+   LED_flag[RED6_LED]=LED_OFF;
+   LED_flag[Yellow6_LED]=LED_OFF;
 
-   LED_flag[I7_Trip]=LED_OFF;
-   LED_flag[I7_Alarm]=LED_OFF;
+   LED_flag[RED7_LED]=LED_OFF;
+   LED_flag[Yellow7_LED]=LED_OFF;
 
-   LED_flag[I8_Trip]=LED_OFF;
-   LED_flag[I8_Alarm]=LED_OFF;
+   LED_flag[RED8_LED]=LED_OFF;
+   LED_flag[Yellow8_LED]=LED_OFF;
 
 }
 
@@ -623,7 +623,7 @@ void input_button_control()
            {
                status_input = Button_State_Func(&input_check_point[name]);
 
-               if((status_input == RELEASED) || (status_input == AGAIN_RELEASED) || (status_input == STILL_RELEASED))
+               if((status_input == RELEASED) || (status_input == AGAIN_RELEASED) || (status_input == STILL_RELEASED) || (status_input == STILL_PRESSED) )
                {
                    // Since we have 16 led flags we implement the logic below.
 
@@ -1541,8 +1541,9 @@ void channel_test()
 
             Input_Channel1();         // Check if right inputs are active for channel1.
 
-            system_status.channelState = Channel2;
+            input_button_control();         // Buttons are controlling each case
 
+            system_status.channelState = Channel2;
 
                 break;
 
@@ -1558,8 +1559,9 @@ void channel_test()
 
                 Input_Channel2();                   // Check if right inputs are active for channel2
 
-                system_status.channelState = Channel3;
+                input_button_control();         // Buttons are controlling each case
 
+                system_status.channelState = Channel3;
 
                 break;
 
@@ -1575,8 +1577,9 @@ void channel_test()
 
             Input_Channel3();                   // Check if right inputs are active for channel2
 
-            system_status.channelState = Channel4;
+            input_button_control();         // Buttons are controlling each case
 
+            system_status.channelState = Channel4;
 
                 break;
 
@@ -1591,8 +1594,9 @@ void channel_test()
 
             Input_Channel4();                   // Check if right inputs are active for channel2
 
-            system_status.channelState = Channel5;
+            input_button_control();         // Buttons are controlling each case
 
+            system_status.channelState = Channel5;
 
                 break;
 
@@ -1607,8 +1611,9 @@ void channel_test()
 
             Input_Channel5();                   // Check if right inputs are active for channel2
 
-            system_status.channelState = Channel6;
+            input_button_control();         // Buttons are controlling each case
 
+            system_status.channelState = Channel6;
 
                 break;
 
@@ -1622,6 +1627,8 @@ void channel_test()
             }
 
             Input_Channel6();                   // Check if right inputs are active for channel2
+
+            input_button_control();         // Buttons are controlling each case
 
             system_status.channelState = Channel7;
 
@@ -1638,14 +1645,14 @@ void channel_test()
 
             Input_Channel7();                   // Check if right inputs are active for channel2
 
-            system_status.channelState = Channel8;
+            input_button_control();         // Buttons are controlling each case
 
+            system_status.channelState = Channel8;
 
                 break;
 
 
         case Channel8:
-
 
             if(system_status.channelState != Channel8)
             {
@@ -1654,6 +1661,8 @@ void channel_test()
             }
 
             Input_Channel8();                   // Check if right inputs are active for channel2
+
+            input_button_control();         // Buttons are controlling each case
 
             system_status.channelState = Channel1;
 
